@@ -120,6 +120,7 @@
     <ClCompile Include="display.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="plane.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="stb_image.c" />
     <ClCompile Include="texture.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="display.h" />
     <ClInclude Include="mesh.h" />
+    <ClInclude Include="plane.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />

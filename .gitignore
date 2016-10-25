@@ -38,6 +38,7 @@ local.properties
 
 # User-specific files
 *.suo
+*.sdf
 *.user
 *.sln.docstates
 
@@ -214,3 +215,10 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+*.filters
+*.vcxproj
+ElasticObjects.VC.opendb
+*.sdf
+*.suo
+*.sdf
+*.sdf

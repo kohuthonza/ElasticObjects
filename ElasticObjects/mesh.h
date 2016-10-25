@@ -3,6 +3,8 @@
 #include <glm/glm.hpp>
 #include <GL/glew.h>
 
+#include "plane.h"
+
 typedef struct Vertex {
 public:
 	Vertex(const glm::vec3 &_pos, const glm::vec3 &_color) {
@@ -27,9 +29,13 @@ public:
 
 	void Draw();
 
+	void Update(glm::vec3 *offsets, const int numOffsets, const Plane &pl);
+
 	virtual ~Mesh();
 
 private:
+	bool CheckCollision(const AABB &a, const AABB &b);
+
 	enum {
 		POSITION_VB,
 		COLOR_VB,
