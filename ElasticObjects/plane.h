@@ -12,7 +12,7 @@ typedef struct AABB {
 
 class Plane {
 public:
-	Plane(const glm::vec3 & color);
+	Plane(const glm::vec3 & color, const glm::vec3 &pos = glm::vec3(0, 0, 0), const GLfloat size = 50.0f);
 
 	void Draw();
 

@@ -86,7 +86,6 @@ void Mesh::Update(glm::vec3 * offsets, const int numOffsets, const Plane &pl){
 		directionVector = offsets[i * 2 + 1];
 
 		if (CheckCollision(planeAABB, cubeAABB)) {
-			//std::cout << "collision" << std::endl;
 			directionVector.y = -directionVector.y;
 		}	
 
@@ -95,7 +94,7 @@ void Mesh::Update(glm::vec3 * offsets, const int numOffsets, const Plane &pl){
 		offsetsVec.push_back(offsets[i * 2]);
 	}
 
-	glBufferSubData(GL_ARRAY_BUFFER, 0, numOffsets * sizeof(offsets[0]), &offsetsVec[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, numOffsets * sizeof(offsetsVec[0]), &offsetsVec[0]);
 
 	glBindVertexArray(0);
 }
