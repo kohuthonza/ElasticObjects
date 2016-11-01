@@ -1,11 +1,13 @@
 #include "plane.h"
 
-Plane::Plane(const glm::vec3 &color){
+Plane::Plane(const glm::vec3 &color, float planeHeight = -0.5f){
+	
+
 	glm::vec3 points[] = {
-		glm::vec3(0 - size/2, -10, 0 -10),
-		glm::vec3(size - size/2, -10, -10),
-		glm::vec3(size - size/2, -10, size - 10),
-		glm::vec3(0 - size/2, -10, size - 10), 
+		glm::vec3(0 - size/2, planeHeight, -10),
+		glm::vec3(size - size/2, planeHeight, -10),
+		glm::vec3(size - size/2, planeHeight, size - 10),
+		glm::vec3(0 - size/2, planeHeight, size - 10),
 	};
 
 	GLuint indices[] = {

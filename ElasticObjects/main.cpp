@@ -14,6 +14,8 @@
 #define WIDTH 1024
 #define HEIGHT 768
 
+using glm::vec3;
+
 static void UpdateFPS(unsigned int &frameCounter) {
 	static std::chrono::time_point<std::chrono::system_clock> start, end;
 
@@ -125,6 +127,9 @@ public:
 		indices.push_back(3);
 		indices.push_back(2);
 
+		pos = vec3(0, 0, 0);
+		
+
 		glGenVertexArrays(1, &vertexArrayObject);
 		glBindVertexArray(vertexArrayObject);
 
@@ -187,6 +192,7 @@ public:
 	}
 
 	glm::vec3 GetPos() { return pos; }
+	glm::vec3 GetVel() { return vel; }
 
 	void SetVel(glm::vec3 $vel) {
 		vel = $vel;
@@ -339,13 +345,252 @@ public:
 	}
 };
 
+int k = 0;
+
+class Spring {
+public:
+	Mass *mass1;
+	Mass *mass2;
+
+	float springConstant;
+	float springLength;
+	float frictionConstant;
+
+	Spring(Mass *$mass1, Mass *$mass2,
+		float $springConstant, float $springLength, float $frictionConstant) 
+	{
+		springConstant = $springConstant;
+		springLength = $springLength;
+		frictionConstant = $frictionConstant;
+
+		mass1 = $mass1;
+		mass2 = $mass2;
+	}
+
+	void Solve() {		
+		glm::vec3 springVector = mass1->GetPos() - mass2->GetPos();
+				
+		float r = glm::length(springVector);
+
+		glm::vec3 force;
+
+		if (r != 0.0f)
+			force = -(springVector / r) * (r - springLength) * springConstant;
+
+		force += -(mass1->GetVel() - mass2->GetVel())*frictionConstant;
+		mass1->ApplyForce(force);
+		mass2->ApplyForce(-force);
+	}
+
+private:
+};
+
+class RopeSimulation : public Simulation {
+public:
+	Spring **springs;
+	vec3 gravitation;
+	vec3 ropeConnectionPos;
+	vec3 ropeConnectionVel;
+
+	float groundRepulsionConstant;
+	float groundFrictionConstant;
+	float groundAbsorptionConstant;
+	float groundHeight;
+	float airFrictionConstant;
+
+	RopeSimulation(
+		int $numOfMasses,
+		float $m,
+		float $springConstant,
+		float $springLength,
+		float $springFrictionConstant,
+		vec3 $gravitation,
+		float $airFrictionConstant,
+		float $groundRepulsionConstant,
+		float $groundFrictionConstant,
+		float $groundAbsorptionConstant,
+		float $groundHeight
+		) : Simulation($numOfMasses, $m)
+	{
+		gravitation = $gravitation;
+		airFrictionConstant = $airFrictionConstant;
+		groundAbsorptionConstant = $groundAbsorptionConstant;
+		groundFrictionConstant = $groundFrictionConstant;
+		groundRepulsionConstant = $groundRepulsionConstant;
+		groundHeight = $groundHeight;
+
+		for (int i = 0; i < numOfMasses; ++i) {
+			masses[i]->SetPos(vec3(i*$springLength, 3.5, 0));
+		}
+
+		springs = new Spring*[numOfMasses - 1];
+
+		for (int i = 0; i < numOfMasses - 1; ++i) {
+			springs[i] = new Spring(
+				masses[i], masses[i + 1], $springConstant,
+				$springLength, $springFrictionConstant);
+		}
+	}
+
+	void Solve() {
+		for (int a = 0; a < numOfMasses - 1; ++a) {
+			springs[a]->Solve();
+		}
+
+		for (int a = 0; a < numOfMasses; ++a) {
+			masses[a]->ApplyForce(gravitation * masses[a]->m);
+			masses[a]->ApplyForce(-masses[a]->GetVel() * airFrictionConstant);
+
+			if (masses[a]->GetPos().y < groundHeight) {
+				vec3 v;
+				v = masses[a]->GetVel();
+
+				v.y = 0;
+
+				masses[a]->ApplyForce(-v * groundFrictionConstant);
+
+				v = masses[a]->GetVel();
+				v.x = 0;
+				v.z = 0;
+
+				if (v.y < 0)
+					masses[a]->ApplyForce(-v*groundAbsorptionConstant);
+
+				vec3 force = vec3(0, groundRepulsionConstant, 0) * (groundHeight - masses[a]->GetPos().y);
+
+				masses[a]->ApplyForce(force);
+			}
+		}
+	}
+
+	void Simulate(float dt) {
+		Simulation::Simulate(dt);
+
+		ropeConnectionPos += ropeConnectionVel*dt;
+
+		if (ropeConnectionPos.y < groundHeight) {
+			ropeConnectionPos.y = groundHeight;
+			ropeConnectionVel.y = 0;
+		}
+
+		masses[0]->SetPos(ropeConnectionPos);
+		masses[0]->SetVel(ropeConnectionVel);
+	}
+
+	void setRopeConnectionVel(vec3 $ropeConnectionVel) {
+		ropeConnectionVel = $ropeConnectionVel;
+	}
+};
+
+class SquareSimulation : public Simulation {
+public:
+	Spring **springs;
+	vec3 gravitation;
+
+	float groundRepulsionConstant;
+	float groundFrictionConstant;
+	float groundAbsorptionConstant;
+	float groundHeight;
+	float airFrictionConstant;
+
+	SquareSimulation(
+		int $numOfMasses,
+		float $m,
+		float $springConstant,
+		float $springLength,
+		float $springFrictionConstant,
+		vec3 $gravitation,
+		float $airFrictionConstant,
+		float $groundRepulsionConstant,
+		float $groundFrictionConstant,
+		float $groundAbsorptionConstant,
+		float $groundHeight
+		) : Simulation($numOfMasses, $m)
+	{
+		gravitation = $gravitation;
+		airFrictionConstant = $airFrictionConstant;
+		groundAbsorptionConstant = $groundAbsorptionConstant;
+		groundFrictionConstant = $groundFrictionConstant;
+		groundRepulsionConstant = $groundRepulsionConstant;
+		groundHeight = $groundHeight;
+
+		//for (int i = 0; i < numOfMasses; ++i) {
+		//	masses[i]->SetPos(vec3(i*$springLength, 1.5, 0));
+		//}
+
+		masses[0]->SetPos(vec3(0, 1, 0));
+		masses[1]->SetPos(vec3(3.5, 1, 0));
+		masses[2]->SetPos(vec3(3.5, 4.5, 0));
+		masses[3]->SetPos(vec3(0, 4.5, 0));
+
+		springs = new Spring*[numOfMasses + 2];
+
+		int i = 0;
+		for (; i < numOfMasses; ++i) {
+			std::cout << "connecting: " << i << " with " << (i + 1) % 4 << std::endl;
+			springs[i] = new Spring(
+				masses[i], masses[(i + 1) % 4], $springConstant,
+				$springLength, $springFrictionConstant);
+		}
+
+		springs[i] = new Spring(masses[0], masses[2], $springConstant, $springLength, $springFrictionConstant);
+		springs[++i] = new Spring(masses[1], masses[3], $springConstant, $springLength, $springFrictionConstant);
+
+		std::cout << i << std::endl;
+	}
+
+	void Solve() {
+		for (int a = 0; a < 6; ++a) {
+			springs[a]->Solve();
+		}
+
+		for (int a = 0; a < numOfMasses; ++a) {
+			masses[a]->ApplyForce(gravitation * masses[a]->m);
+			masses[a]->ApplyForce(-masses[a]->GetVel() * airFrictionConstant);
+
+			if (masses[a]->GetPos().y < groundHeight) {
+				vec3 v;
+				v = masses[a]->GetVel();
+
+				v.y = 0;
+
+				masses[a]->ApplyForce(-v * groundFrictionConstant);
+
+				v = masses[a]->GetVel();
+				v.x = 0;
+				v.z = 0;
+
+				if (v.y < 0)
+					masses[a]->ApplyForce(-v*groundAbsorptionConstant);
+
+				vec3 force = vec3(0, groundRepulsionConstant, 0) * (groundHeight - masses[a]->GetPos().y);
+
+				masses[a]->ApplyForce(force);
+			}
+		}
+	}
+
+	void Simulate(float dt) {
+		Simulation::Simulate(dt);
+
+		//ropeConnectionPos += ropeConnectionVel*dt;
+
+		//if (ropeConnectionPos.y < groundHeight) {
+		//	ropeConnectionPos.y = groundHeight;
+		//	ropeConnectionVel.y = 0;
+		//}
+
+		//masses[0]->SetPos(ropeConnectionPos);
+		//masses[0]->SetVel(ropeConnectionVel);
+	}
+};
 
 void SimTest(int milliseconds) {
 	Display display(WIDTH, HEIGHT, "OpenGL Test");
 	Shader shader("basic");
 	Transform transform;
 	Camera camera(glm::vec3(0, 0, 10), 70.0f, (float)(WIDTH / HEIGHT), 0.01f, 1000.0f);
-	Plane plane(glm::vec3(0, 1, 1));
+	Plane plane(glm::vec3(0, 1, 1), -0.5f);
 	
 	unsigned int frameCounter = 0;
 
@@ -353,7 +598,7 @@ void SimTest(int milliseconds) {
 	float dt = milliseconds / 1000.f;
 	int numOfIterations = (int)(dt / maxPossible_dt) + 1;
 
-	static const float slowMotionRatio = 200.0f;
+	static const float slowMotionRatio = 5.0f;
 	static float timeElapsed = 0.f;
 
 	dt /= slowMotionRatio;
@@ -363,9 +608,39 @@ void SimTest(int milliseconds) {
 
 	timeElapsed += dt;
 
-	ConstantVelocity cv;
-	Gravitation gv(glm::vec3(0.f, -9.81f, 0.f));
-	MassConnectedSpring mcs(50.f);
+	//ConstantVelocity cv;
+	//Gravitation gv(glm::vec3(0.f, -9.81f, 0.f));
+	//MassConnectedSpring mcs(50.f);
+
+	/*
+	RopeSimulation rs(
+		50,
+		0.05f,
+		1.0f,
+		0.05f,
+		0.2f,
+		vec3(0, -0.981f, 0),
+		0.02f,
+		100.0f,
+		0.2f,
+		2.0f,
+		-0.5f
+		);
+		*/
+
+	SquareSimulation ss(
+		4,
+		0.5f,
+		1.10f,
+		3.5f,
+		0.2f,
+		vec3(0, -0.981f, 0),
+		0.0002f,
+		100.0f,
+		0.2f,
+		20.0f,
+		-0.5f
+		);
 
 	while (!display.IsClosed()) {
 		display.Clear(0.01, 0.16, 0.15, 1.0);
@@ -375,7 +650,10 @@ void SimTest(int milliseconds) {
 
 		//cv.Operate(dt);
 		//gv.Operate(dt);
-		mcs.Operate(dt);
+		//mcs.Operate(dt);
+		//rs.Operate(dt);
+		ss.Operate(dt);
+
 		plane.Draw();
 
 		display.Update(camera);
