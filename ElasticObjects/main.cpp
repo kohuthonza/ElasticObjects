@@ -86,7 +86,7 @@ static int RunBoxes(void) {
 
 	Camera camera( glm::vec3(0, 0, 10), 70.0f, (float) (WIDTH / HEIGHT), 0.01f, 1000.0f);
 
-	Plane plane(glm::vec3(0, 1, 1));
+	Plane plane(glm::vec3(0, 1, 1), -0.5f);
 
 	unsigned int frameCounter = 0;
 
@@ -110,15 +110,87 @@ static int RunBoxes(void) {
 	return 0;
 }
 
-class Mass {
-public:
-	Mass(float $mass) {
-		m = $mass;
+struct MyVertex
+{
+	MyVertex(vec3 $pos, vec3 $vel, vec3 $force, float $mass) {
+		pos = $pos;
+		vel = $vel;
+		force = $force;
+		mass = $mass;
+	}
 
-		vertices.push_back(glm::vec3(-1.0, 1.0, 1.0));
+	vec3 pos;
+	vec3 vel;
+	vec3 force;
+	float mass;
+
+	void ApplyForce(vec3 $force) {
+		force += $force;
+	}
+};
+
+class MySpring {
+private:
+	MyVertex *point1;
+	MyVertex *point2;
+
+	float springConstant;
+	float springLength;
+
+	const float airFrictionConstant = 0.2f;
+
+public:
+	MySpring(MyVertex *$point1, MyVertex *$point2, float springLen, float springConst) {
+		point1 = $point1;
+		point2 = $point2;
+
+		springLength = springLen;
+		springConstant = springConst;
+	}
+
+	void Solve() {
+		glm::vec3 springVector = point1->pos - point2->pos;
+
+		float r = glm::length(springVector);
+
+		glm::vec3 force(0, 0, 0);
+
+		if (r != 0.0f)
+			force += -(springVector / r) * (r - springLength) * springConstant;
+
+		force += -(point1->vel - point2->vel)*airFrictionConstant;
+		point1->ApplyForce(force);
+		point2->ApplyForce(-force);
+	}
+};
+
+
+class Object {
+public:
+	Object() {};
+
+	void AddVertex(MyVertex *vertex) {
+		verts.push_back(vertex);
+	}
+
+	void AddIndex(GLushort index) {
+		indices.push_back(index);
+	}
+
+	void AddSpring(int point1, int point2, float springConstat) {
+		springs.push_back(new MySpring(verts[point1], verts[point2], glm::distance(verts[point2]->pos, verts[point1]->pos), springConstat));
+	}
+
+	void InitTest() {
+		verts.push_back(new MyVertex(vec3(-1.0, -1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(-10.0, 0.0, 0.0), 10.0f));
+		verts.push_back(new MyVertex(vec3(1.0, -1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 10.0f));
+		verts.push_back(new MyVertex(vec3(1.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(-0.099, 0.0, 0.0), 10.0f));
+		verts.push_back(new MyVertex(vec3(-1.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, -400.0, 0.0), 10.0f));
+
 		vertices.push_back(glm::vec3(-1.0, -1.0, 1.0));
 		vertices.push_back(glm::vec3(1.0, -1.0, 1.0));
 		vertices.push_back(glm::vec3(1.0, 1.0, 1.0));
+		vertices.push_back(glm::vec3(-1.0, 1.0, 1.0));
 
 		indices.push_back(0);
 		indices.push_back(2);
@@ -127,8 +199,17 @@ public:
 		indices.push_back(3);
 		indices.push_back(2);
 
-		pos = vec3(0, 0, 0);
-		
+		AddSpring(0, 1, 1.0f);
+		AddSpring(1, 2, 1.0f);
+		AddSpring(3, 2, 1.0f);
+		AddSpring(0, 3, 1.0f);
+		AddSpring(0, 2, 10.0f);
+		AddSpring(1, 3, 1.0f);
+
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
 
 		glGenVertexArrays(1, &vertexArrayObject);
 		glBindVertexArray(vertexArrayObject);
@@ -143,7 +224,7 @@ public:
 
 		//colors
 		glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[COLOR_VB]);
-		glBufferData(GL_ARRAY_BUFFER, sizeof(red), &red, GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(colors), &colors[0], GL_STATIC_DRAW);
 
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -155,8 +236,120 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void Init(){
-		force = glm::vec3(0, 0, 0);
+	void InitTestHexa() {
+		verts.push_back(new MyVertex(vec3(-0.25, -1.0, 1.0), vec3(0.4, 0.4, 0.0), vec3(0.0, 0.0, 0.0), 2.0f));
+		verts.push_back(new MyVertex(vec3(0.25, -1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
+		verts.push_back(new MyVertex(vec3(1.0, -0.25, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
+		verts.push_back(new MyVertex(vec3(1.0, 0.25, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
+		verts.push_back(new MyVertex(vec3(0.25, 1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
+		verts.push_back(new MyVertex(vec3(-0.25, 1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
+		verts.push_back(new MyVertex(vec3(-1.0, 0.25, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
+		verts.push_back(new MyVertex(vec3(-1.0, -0.25, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 10.0f));
+
+		vertices.push_back(verts[0]->pos);
+		vertices.push_back(verts[1]->pos);
+		vertices.push_back(verts[2]->pos);
+		vertices.push_back(verts[3]->pos);
+		vertices.push_back(verts[4]->pos);
+		vertices.push_back(verts[5]->pos);
+		vertices.push_back(verts[6]->pos);
+		vertices.push_back(verts[7]->pos);
+
+		indices.push_back(0);
+		indices.push_back(2);
+		indices.push_back(1);
+
+		indices.push_back(0);
+		indices.push_back(3);
+		indices.push_back(2);
+
+		indices.push_back(0);
+		indices.push_back(4);
+		indices.push_back(3);
+
+		indices.push_back(0);
+		indices.push_back(5);
+		indices.push_back(4);
+
+		indices.push_back(0);
+		indices.push_back(6);
+		indices.push_back(5);
+
+		indices.push_back(0);
+		indices.push_back(7);
+		indices.push_back(6);
+
+		AddSpring(0, 6, 1.0f);
+		AddSpring(0, 5, 1.0f);
+		AddSpring(0, 4, 1.0f);
+		AddSpring(0, 3, 1.0f);
+
+		AddSpring(1, 7, 1.0f);
+		AddSpring(1, 6, 1.0f);
+		AddSpring(1, 5, 1.0f);
+		AddSpring(1, 4, 1.0f);
+
+		AddSpring(2, 7, 1.0f);
+		AddSpring(2, 6, 1.0f);
+		AddSpring(2, 5, 1.0f);
+		AddSpring(2, 0, 1.0f);
+
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
+		colors.push_back(red);
+
+		glGenVertexArrays(1, &vertexArrayObject);
+		glBindVertexArray(vertexArrayObject);
+
+		//positions
+		glGenBuffers(NUM_BUFFERS, vertexArrayBuffers);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
+		glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_DYNAMIC_DRAW);
+
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		//colors
+		glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[COLOR_VB]);
+		glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(colors), &colors[0], GL_STATIC_DRAW);
+
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+		//indices
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexArrayBuffers[INDICES_VB]);
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
+
+		glBindVertexArray(0);
+	}
+
+	void Solve() {
+		for (int i = 0; i < springs.size(); ++i) {
+			springs[i]->Solve();
+		}
+	}
+
+	void Simulate(float dt) {
+		for (int i = 0; i < verts.size(); ++i) {
+			//verts[i]->ApplyForce(gravitation * verts[i]->mass);
+			verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
+
+			verts[i]->vel += (verts[i]->force / verts[i]->mass) * dt;
+			vec3 newPosVector = verts[i]->vel * dt;
+			verts[i]->pos += newPosVector;
+
+			vertices[i] += newPosVector;
+
+			verts[i]->force = vec3(0, 0, 0);
+		}
+
+		glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(vertices[0]), &vertices[0]);
 	}
 
 	void Draw() {
@@ -165,52 +358,19 @@ public:
 		glBindVertexArray(0);
 	}
 
-	void ApplyForce(glm::vec3 $force) {
-		force += $force;
-	}
+private:
+	const vec3 gravitation = vec3(0, -9.81f, 0);
+	const float airFrictionConstant = 0.2f;
 
-	void Simulate(float dt) {
-		vel += (force / m) * dt;		
-
-		glm::vec3 newPosVector = vel * dt;
-		pos += newPosVector;
-
-		for (int a = 0; a < vertices.size(); ++a) {
-			vertices[a] += newPosVector;
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(vertices[0]), &vertices[0]);
-	}
-
-	void SetPos(glm::vec3 $pos) {
-		pos = $pos;
-		for (int a = 0; a < vertices.size(); ++a) {
-			vertices[a] += pos;
-		}
-		glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(vertices[0]), &vertices[0]);
-	}
-
-	glm::vec3 GetPos() { return pos; }
-	glm::vec3 GetVel() { return vel; }
-
-	void SetVel(glm::vec3 $vel) {
-		vel = $vel;
-	}	
-
-	float m;
-
-private:	
-
-	glm::vec3 pos;
-	glm::vec3 vel;
-	glm::vec3 force;
-
-	glm::vec3 red = glm::vec3(1.0f, 0.0f, 0.0f);	//red
+	std::vector<MyVertex *> verts;
+	std::vector<MySpring *> springs;
 
 	std::vector<glm::vec3> vertices;
 	std::vector<GLushort> indices;
-	
+	std::vector<glm::vec3> colors;	
+
+	glm::vec3 red = glm::vec3(1.0f, 0.0f, 0.0f);	//red
+
 	enum {
 		POSITION_VB,
 		COLOR_VB,
@@ -221,66 +381,35 @@ private:
 
 	GLuint vertexArrayObject;
 	GLuint vertexArrayBuffers[NUM_BUFFERS];
-
 };
 
-class Simulation {
+class MySim {
 public:
-	int numOfMasses;
-	Mass **masses;
-
-	Simulation(int $numMasses, float $m) {
-		numOfMasses = $numMasses;
-
-		masses = new Mass*[numOfMasses];
-
-		for (int i = 0; i < numOfMasses; ++i) {
-			masses[i] = new Mass($m);
-		}
-	}
-
-	~Simulation() {
-		release();
-	}
-
-	virtual void release()                          // Delete The Masses Created.
-	{
-		for (int a = 0; a < numOfMasses; ++a)                // We Will Delete All Of Them.
-		{
-			delete(masses[a]);
-			masses[a] = NULL;
-		}
-
-		delete(masses);
-		masses = NULL;
-	}
-
-	Mass* getMass(int index)
-	{
-		if (index < 0 || index >= numOfMasses)                // If The index Is Not In The Array.
-			return NULL;                        // Then Return NULL.
-
-		return masses[index];                       // Get The Mass At The index.
+	MySim() {
+		objects.push_back(new Object());
+		objects.push_back(new Object());
+		objects[0]->InitTestHexa();
+		objects[1]->InitTest();
 	}
 
 	virtual void init()                         // This Method Will Call The init() Method Of Every Mass.
 	{
-		for (int a = 0; a < numOfMasses; ++a)                // We Will init() Every Mass.
-			masses[a]->Init();                   // Call init() Method Of The Mass.
+		
 	}
 
 	virtual void Solve() {
-
+		for (int a = 0; a < objects.size(); ++a)               
+			objects[a]->Solve();
 	}
 
 	virtual void Simulate(float dt) {
-		for (int a = 0; a < numOfMasses; ++a)                // We Will Iterate Every Mass.
-			masses[a]->Simulate(dt);
+		for (int a = 0; a < objects.size(); ++a)                // We Will Iterate Every Mass.
+			objects[a]->Simulate(dt);
 	}
 
 	virtual void Draw() {
-		for (int a = 0; a < numOfMasses; ++a)
-			masses[a]->Draw();
+		for (int a = 0; a < objects.size(); ++a)
+			objects[a]->Draw();
 	}
 
 	virtual void Operate(float dt) {
@@ -289,256 +418,14 @@ public:
 		Simulate(dt);
 		Draw();
 	}
-};
-
-class ConstantVelocity : public Simulation {
-public:
-	ConstantVelocity() : Simulation(2, 1.f) {
-		masses[0]->SetPos(glm::vec3(0.f, 3.3f, 0.f));
-		masses[0]->SetVel(glm::vec3(1.5f, 0.95f, 0.f));
-		
-		masses[1]->SetPos(glm::vec3(0.2f, 0.5f, 0.f));
-		masses[1]->SetVel(glm::vec3(0.f, -2.6f, 1.67f));
-	}
-};
-
-class Gravitation : public Simulation {
-private:
-	glm::vec3 gravitation;
-
-public:
-	Gravitation(glm::vec3 grav) : Simulation(2, 30.55f) {
-		gravitation = grav;
-
-		masses[0]->SetPos(glm::vec3(2.f, 3.3f, -5.f));
-		masses[0]->SetVel(glm::vec3(1.5f, 0.95f, 0.f));
-
-		masses[1]->SetPos(glm::vec3(2.f, 0.5f, -5.f));
-		masses[1]->SetVel(glm::vec3(0.f, -2.6f, 1.67f));
-	}
-
-	virtual void Solve() {
-		for (int i = 0; i < numOfMasses; ++i) {
-			masses[i]->ApplyForce(gravitation * masses[i]->m);
-		}
-	}
-};
-
-class MassConnectedSpring : public Simulation {
-public:
-	float K;
-
-	glm::vec3 connectionPos;
-
-	MassConnectedSpring(float springConstant) : Simulation(1, 1.f) {
-		K = springConstant;
-		connectionPos = glm::vec3(0.f, 0.f, 0.f);
-		masses[0]->SetPos(glm::vec3(0.f, -1.5f, 0.f));
-		masses[0]->SetVel(glm::vec3(0.f, 0.f, 0.0f));
-	}
-
-	virtual void Solve() {
-		for (int i = 0; i < numOfMasses; ++i) {
-			glm::vec3 springVector = glm::vec3(masses[i]->GetPos() - connectionPos);
-			masses[i]->ApplyForce(-springVector * K);
-		}
-	}
-};
-
-int k = 0;
-
-class Spring {
-public:
-	Mass *mass1;
-	Mass *mass2;
-
-	float springConstant;
-	float springLength;
-	float frictionConstant;
-
-	Spring(Mass *$mass1, Mass *$mass2,
-		float $springConstant, float $springLength, float $frictionConstant) 
-	{
-		springConstant = $springConstant;
-		springLength = $springLength;
-		frictionConstant = $frictionConstant;
-
-		mass1 = $mass1;
-		mass2 = $mass2;
-	}
-
-	void Solve() {		
-		glm::vec3 springVector = mass1->GetPos() - mass2->GetPos();
-				
-		float r = glm::length(springVector);
-
-		glm::vec3 force;
-
-		if (r != 0.0f)
-			force = -(springVector / r) * (r - springLength) * springConstant;
-
-		force += -(mass1->GetVel() - mass2->GetVel())*frictionConstant;
-		mass1->ApplyForce(force);
-		mass2->ApplyForce(-force);
-	}
 
 private:
+	std::vector<Object *> objects;
+
 };
 
-class RopeSimulation : public Simulation {
-public:
-	Spring **springs;
-	vec3 gravitation;
-	vec3 ropeConnectionPos;
-	vec3 ropeConnectionVel;
-
-	float groundRepulsionConstant;
-	float groundFrictionConstant;
-	float groundAbsorptionConstant;
-	float groundHeight;
-	float airFrictionConstant;
-
-	RopeSimulation(
-		int $numOfMasses,
-		float $m,
-		float $springConstant,
-		float $springLength,
-		float $springFrictionConstant,
-		vec3 $gravitation,
-		float $airFrictionConstant,
-		float $groundRepulsionConstant,
-		float $groundFrictionConstant,
-		float $groundAbsorptionConstant,
-		float $groundHeight
-		) : Simulation($numOfMasses, $m)
-	{
-		gravitation = $gravitation;
-		airFrictionConstant = $airFrictionConstant;
-		groundAbsorptionConstant = $groundAbsorptionConstant;
-		groundFrictionConstant = $groundFrictionConstant;
-		groundRepulsionConstant = $groundRepulsionConstant;
-		groundHeight = $groundHeight;
-
-		for (int i = 0; i < numOfMasses; ++i) {
-			masses[i]->SetPos(vec3(i*$springLength, 3.5, 0));
-		}
-
-		springs = new Spring*[numOfMasses - 1];
-
-		for (int i = 0; i < numOfMasses - 1; ++i) {
-			springs[i] = new Spring(
-				masses[i], masses[i + 1], $springConstant,
-				$springLength, $springFrictionConstant);
-		}
-	}
-
-	void Solve() {
-		for (int a = 0; a < numOfMasses - 1; ++a) {
-			springs[a]->Solve();
-		}
-
-		for (int a = 0; a < numOfMasses; ++a) {
-			masses[a]->ApplyForce(gravitation * masses[a]->m);
-			masses[a]->ApplyForce(-masses[a]->GetVel() * airFrictionConstant);
-
-			if (masses[a]->GetPos().y < groundHeight) {
-				vec3 v;
-				v = masses[a]->GetVel();
-
-				v.y = 0;
-
-				masses[a]->ApplyForce(-v * groundFrictionConstant);
-
-				v = masses[a]->GetVel();
-				v.x = 0;
-				v.z = 0;
-
-				if (v.y < 0)
-					masses[a]->ApplyForce(-v*groundAbsorptionConstant);
-
-				vec3 force = vec3(0, groundRepulsionConstant, 0) * (groundHeight - masses[a]->GetPos().y);
-
-				masses[a]->ApplyForce(force);
-			}
-		}
-	}
-
-	void Simulate(float dt) {
-		Simulation::Simulate(dt);
-
-		ropeConnectionPos += ropeConnectionVel*dt;
-
-		if (ropeConnectionPos.y < groundHeight) {
-			ropeConnectionPos.y = groundHeight;
-			ropeConnectionVel.y = 0;
-		}
-
-		masses[0]->SetPos(ropeConnectionPos);
-		masses[0]->SetVel(ropeConnectionVel);
-	}
-
-	void setRopeConnectionVel(vec3 $ropeConnectionVel) {
-		ropeConnectionVel = $ropeConnectionVel;
-	}
-};
-
-class SquareSimulation : public Simulation {
-public:
-	Spring **springs;
-	vec3 gravitation;
-
-	float groundRepulsionConstant;
-	float groundFrictionConstant;
-	float groundAbsorptionConstant;
-	float groundHeight;
-	float airFrictionConstant;
-
-	SquareSimulation(
-		int $numOfMasses,
-		float $m,
-		float $springConstant,
-		float $springLength,
-		float $springFrictionConstant,
-		vec3 $gravitation,
-		float $airFrictionConstant,
-		float $groundRepulsionConstant,
-		float $groundFrictionConstant,
-		float $groundAbsorptionConstant,
-		float $groundHeight
-		) : Simulation($numOfMasses, $m)
-	{
-		gravitation = $gravitation;
-		airFrictionConstant = $airFrictionConstant;
-		groundAbsorptionConstant = $groundAbsorptionConstant;
-		groundFrictionConstant = $groundFrictionConstant;
-		groundRepulsionConstant = $groundRepulsionConstant;
-		groundHeight = $groundHeight;
-
-		//for (int i = 0; i < numOfMasses; ++i) {
-		//	masses[i]->SetPos(vec3(i*$springLength, 1.5, 0));
-		//}
-
-		masses[0]->SetPos(vec3(0, 1, 0));
-		masses[1]->SetPos(vec3(3.5, 1, 0));
-		masses[2]->SetPos(vec3(3.5, 4.5, 0));
-		masses[3]->SetPos(vec3(0, 4.5, 0));
-
-		springs = new Spring*[numOfMasses + 2];
-
-		int i = 0;
-		for (; i < numOfMasses; ++i) {
-			std::cout << "connecting: " << i << " with " << (i + 1) % 4 << std::endl;
-			springs[i] = new Spring(
-				masses[i], masses[(i + 1) % 4], $springConstant,
-				$springLength, $springFrictionConstant);
-		}
-
-		springs[i] = new Spring(masses[0], masses[2], $springConstant, $springLength, $springFrictionConstant);
-		springs[++i] = new Spring(masses[1], masses[3], $springConstant, $springLength, $springFrictionConstant);
-
-		std::cout << i << std::endl;
-	}
-
+/*
+class SquareSimulation {
 	void Solve() {
 		for (int a = 0; a < 6; ++a) {
 			springs[a]->Solve();
@@ -569,28 +456,15 @@ public:
 			}
 		}
 	}
-
-	void Simulate(float dt) {
-		Simulation::Simulate(dt);
-
-		//ropeConnectionPos += ropeConnectionVel*dt;
-
-		//if (ropeConnectionPos.y < groundHeight) {
-		//	ropeConnectionPos.y = groundHeight;
-		//	ropeConnectionVel.y = 0;
-		//}
-
-		//masses[0]->SetPos(ropeConnectionPos);
-		//masses[0]->SetVel(ropeConnectionVel);
-	}
 };
+*/
 
 void SimTest(int milliseconds) {
 	Display display(WIDTH, HEIGHT, "OpenGL Test");
 	Shader shader("basic");
 	Transform transform;
 	Camera camera(glm::vec3(0, 0, 10), 70.0f, (float)(WIDTH / HEIGHT), 0.01f, 1000.0f);
-	Plane plane(glm::vec3(0, 1, 1), -0.5f);
+	Plane plane(glm::vec3(0, 1, 1), -3.5f);
 	
 	unsigned int frameCounter = 0;
 
@@ -606,41 +480,9 @@ void SimTest(int milliseconds) {
 	if (numOfIterations != 0)                       // Avoid Division By Zero.
 		dt = dt / numOfIterations;
 
-	timeElapsed += dt;
+	timeElapsed += dt;	
 
-	//ConstantVelocity cv;
-	//Gravitation gv(glm::vec3(0.f, -9.81f, 0.f));
-	//MassConnectedSpring mcs(50.f);
-
-	/*
-	RopeSimulation rs(
-		50,
-		0.05f,
-		1.0f,
-		0.05f,
-		0.2f,
-		vec3(0, -0.981f, 0),
-		0.02f,
-		100.0f,
-		0.2f,
-		2.0f,
-		-0.5f
-		);
-		*/
-
-	SquareSimulation ss(
-		4,
-		0.5f,
-		1.10f,
-		3.5f,
-		0.2f,
-		vec3(0, -0.981f, 0),
-		0.0002f,
-		100.0f,
-		0.2f,
-		20.0f,
-		-0.5f
-		);
+	MySim ms;
 
 	while (!display.IsClosed()) {
 		display.Clear(0.01, 0.16, 0.15, 1.0);
@@ -648,11 +490,7 @@ void SimTest(int milliseconds) {
 		shader.Bind();
 		shader.Update(transform, camera);
 
-		//cv.Operate(dt);
-		//gv.Operate(dt);
-		//mcs.Operate(dt);
-		//rs.Operate(dt);
-		ss.Operate(dt);
+		ms.Operate(dt);
 
 		plane.Draw();
 
