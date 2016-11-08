@@ -119,22 +119,28 @@
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="display.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="mesh.cpp" />
+    <ClCompile Include="object.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="shader.cpp" />
+    <ClCompile Include="sim.cpp" />
+    <ClCompile Include="spring.cpp" />
     <ClCompile Include="stb_image.c" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="transform.cpp" />
+    <ClCompile Include="vertex.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="display.h" />
-    <ClInclude Include="mesh.h" />
+    <ClInclude Include="object.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="shader.h" />
+    <ClInclude Include="sim.h" />
+    <ClInclude Include="spring.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="transform.h" />
+    <ClInclude Include="vertex.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.fs" />
