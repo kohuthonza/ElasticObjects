@@ -1,10 +1,12 @@
 #include "sim.h"
 
 Sim::Sim() {
+	//objects.push_back(new Object());
 	objects.push_back(new Object());
-	objects.push_back(new Object());
-	objects[0]->InitTestHexa();
-	objects[1]->InitTest();
+	//objects.push_back(new Object());
+	//objects[0]->InitTestHexa();
+	//objects[0]->InitTest();
+	objects[0]->InitOBJTest();
 }
 
 void Sim::init()                         // This Method Will Call The init() Method Of Every Mass.

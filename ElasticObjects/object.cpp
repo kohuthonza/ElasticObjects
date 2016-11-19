@@ -1,4 +1,7 @@
 #include "object.h"
+#include "OBJ_Loader.h"
+
+/* tmp  */ #include <iostream>
 
 inline void Object::AddVertex(Vertex * vertex) {
 	verts.push_back(vertex);
@@ -12,7 +15,68 @@ inline void Object::AddSpring(int point1, int point2, float springConstat) {
 	springs.push_back(new Spring(verts[point1], verts[point2], glm::distance(verts[point2]->pos, verts[point1]->pos), springConstat));
 }
 
+void Object::InitOBJTest() {
+
+	OBJ_Loader obj("obj_models\\simple_sphere.obj");
+	vertices = obj.getVertices();
+	indices = obj.getIndices();
+	//obj.getNormals();
+
+	for (std::vector<glm::vec3>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
+		verts.push_back(new Vertex( (*it) , vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
+	}
+
+	//vertices.push_back(glm::vec3(-1.0, -1.0, 1.0));
+	//vertices.push_back(glm::vec3(1.0, -1.0, 1.0));
+	//vertices.push_back(glm::vec3(1.0, 1.0, 1.0));
+	//vertices.push_back(glm::vec3(-1.0, 1.0, 1.0));
+
+	//indices.push_back(0);
+	//indices.push_back(2);
+	//indices.push_back(1);
+
+	//indices.push_back(0);
+	//indices.push_back(3);
+	//indices.push_back(2);
+
+	for (int i = 0; i < obj.getVerticesNumber(); i++) {
+		for (int j = 0; j < obj.getVerticesNumber(); j++) {
+			AddSpring(i, j, 100.0f);
+		}
+	}
+	
+	for (int i = 0; i < obj.getVerticesNumber(); i++) {
+		colors.push_back(red);
+	}
+	
+	glGenVertexArrays(1, &vertexArrayObject);
+	glBindVertexArray(vertexArrayObject);
+
+	//positions
+	glGenBuffers(NUM_BUFFERS, vertexArrayBuffers);
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_DYNAMIC_DRAW);
+
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	//colors
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[COLOR_VB]);
+	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(colors), &colors[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	//indices
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexArrayBuffers[INDICES_VB]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
+
+	glBindVertexArray(0);
+}
+
+
 void Object::InitTest() {
+
 	verts.push_back(new Vertex(vec3(-1.0, -1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
 	verts.push_back(new Vertex(vec3(1.0, -1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
 	verts.push_back(new Vertex(vec3(1.0, 1.0, 1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
@@ -26,6 +90,7 @@ void Object::InitTest() {
 	indices.push_back(0);
 	indices.push_back(2);
 	indices.push_back(1);
+
 	indices.push_back(0);
 	indices.push_back(3);
 	indices.push_back(2);

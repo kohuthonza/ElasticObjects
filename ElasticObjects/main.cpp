@@ -64,7 +64,7 @@ void SimTest(int milliseconds) {
 
 		ms.Operate(dt);
 
-		//plane.Draw();
+		plane.Draw();
 
 		display.Update(camera);
 
