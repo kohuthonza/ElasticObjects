@@ -223,4 +223,10 @@ ElasticObjects.VC.opendb
 *.sdf
 *.sdf
 *.suo
+<<<<<<< HEAD
 *.suo
+=======
+ElasticObjects.VC.db
+*.opendb
+.vs/ElasticObjects/v14/.suo
+>>>>>>> origin/master
