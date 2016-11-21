@@ -122,6 +122,7 @@
     <ClCompile Include="display.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="OBJ_Loader.cpp" />
     <ClCompile Include="plane.cpp" />
     <ClCompile Include="shader.cpp" />
     <ClCompile Include="sim.cpp" />
@@ -135,6 +136,7 @@
     <ClInclude Include="camera.h" />
     <ClInclude Include="display.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="plane.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="sim.h" />
@@ -147,6 +149,14 @@
   <ItemGroup>
     <None Include="basic.fs" />
     <None Include="basic.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="obj_models\simple_cube.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </Object>
+    <Object Include="obj_models\simple_sphere.obj">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+    </Object>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

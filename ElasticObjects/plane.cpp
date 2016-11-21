@@ -1,5 +1,6 @@
 #include "plane.h"
 
+
 Plane::Plane(const glm::vec3 &color, float planeHeight = -0.5f){
 	glm::vec3 points[] = {
 		glm::vec3(0 - size/2, planeHeight, -10),

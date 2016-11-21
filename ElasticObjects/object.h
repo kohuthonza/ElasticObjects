@@ -30,6 +30,8 @@ public:
 
 	void InitTestHexa();
 
+	void InitOBJTest();
+
 	void Solve();
 
 	void Simulate(float dt);
@@ -60,6 +62,7 @@ private:
 	std::vector<glm::vec3> vertices;
 	std::vector<GLushort> indices;
 	std::vector<glm::vec3> colors;
+	std::vector<glm::vec3> normals;
 
 	glm::vec3 red = glm::vec3(1.0f, 0.0f, 0.0f);
 	glm::vec3 green = glm::vec3(0.0f, 1.0f, 0.0f);

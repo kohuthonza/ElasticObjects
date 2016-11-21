@@ -37,7 +37,7 @@ void SimTest(int milliseconds) {
 	Transform transform;
 	Camera camera(glm::vec3(0, 0, 10), 70.0f, (float)(WIDTH / HEIGHT), 0.01f, 1000.0f);
 
-	//Plane plane(glm::vec3(0, 1, 0), glm::vec3(0, -1.5, 0), glm::vec3(3, -1.5, 0), 0.5f);
+	Plane plane(glm::vec3(0, 1, 0), glm::vec3(0, -1.5, 0), glm::vec3(3, -1.5, 0), 0.5f);
 	
 	unsigned int frameCounter = 0;
 
@@ -67,7 +67,7 @@ void SimTest(int milliseconds) {
 
 		ms.Operate(dt, stopSimFlag);
 
-		//plane.Draw();
+		plane.Draw();
 
 		display.Update(camera, &stopSimFlag);
 

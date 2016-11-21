@@ -3,11 +3,17 @@
 #include <iostream>
 
 Sim::Sim() {
+	//objects.push_back(new Object());
 	objects.push_back(new Object());
+
 	objects.push_back(new Object(glm::vec3(0, 1, 0), glm::vec3(0, -1.5, -1), glm::vec3(3, -1.5, -1), 5.f));
 	objects[0]->InitTestHexa();
 	objects[0]->GenerateBoundingBox();
 	objects[1]->GenerateBoundingBox();
+
+	objects.push_back(new Object());
+	objects[2]->InitOBJTest();
+	
 }
 
 Sim::~Sim(){
