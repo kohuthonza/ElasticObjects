@@ -225,3 +225,5 @@ ElasticObjects.VC.opendb
 *.suo
 
 *.opendb
+ElasticObjects.VC.db
+ElasticObjects.VC.db
