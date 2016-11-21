@@ -26,13 +26,13 @@ void Object::InitOBJTest() {
 		verts.push_back(new Vertex( i, vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f ) );
 	}
 	
-	for (int i = 0; i < obj.getVerticesNumber(); i++) {
-		for (int j = 0; j < obj.getVerticesNumber(); j++ ) {
+	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
+		for (unsigned int j = 0; j < obj.getVerticesNumber(); j++ ) {
 			AddSpring(i, j, 1.0f);
 		}
 	}
 	
- 	for (int i = 0; i < obj.getVerticesNumber(); i++) {
+ 	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
 		colors.push_back(red);
 	}
 	
