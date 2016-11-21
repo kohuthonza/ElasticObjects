@@ -34,7 +34,7 @@ Display::Display(int w, int h, const std::string &name){
 
 static int oldX = 0, oldY = 0;
 
-void Display::Update(Camera &camera){
+void Display::Update(Camera &camera, int *stopSim){
 	SDL_GL_SwapWindow(window);
 
 	SDL_Event e;
@@ -58,6 +58,10 @@ void Display::Update(Camera &camera){
 						break;
 					case SDLK_DOWN:
 						camera.GetPos() = camera.GetPos() - camera.GetFwd() * 0.05f;
+						break;
+					case SDLK_SPACE:
+						std::cout << "space hit" << std::endl;
+						*stopSim = 1 - *stopSim;
 						break;
 					default:
 						break;

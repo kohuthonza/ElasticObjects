@@ -36,7 +36,8 @@ void SimTest(int milliseconds) {
 	Shader shader("basic");
 	Transform transform;
 	Camera camera(glm::vec3(0, 0, 10), 70.0f, (float)(WIDTH / HEIGHT), 0.01f, 1000.0f);
-	Plane plane(glm::vec3(0, 1, 1), -3.5f);
+
+	//Plane plane(glm::vec3(0, 1, 0), glm::vec3(0, -1.5, 0), glm::vec3(3, -1.5, 0), 0.5f);
 	
 	unsigned int frameCounter = 0;
 
@@ -56,24 +57,26 @@ void SimTest(int milliseconds) {
 
 	Sim ms;
 
+	int stopSimFlag = 0;
+
 	while (!display.IsClosed()) {
 		display.Clear(0.01f, 0.16f, 0.15f, 1.0f);
 
 		shader.Bind();
 		shader.Update(transform, camera);
 
-		ms.Operate(dt);
+		ms.Operate(dt, stopSimFlag);
 
 		//plane.Draw();
 
-		display.Update(camera);
+		display.Update(camera, &stopSimFlag);
 
 		frameCounter++;
-		UpdateFPS(frameCounter);
+		//UpdateFPS(frameCounter);
 	}
 }
 
 #undef main
 int main() {
-	SimTest(200);
+	SimTest(20);
 }

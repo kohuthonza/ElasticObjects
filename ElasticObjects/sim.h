@@ -8,16 +8,24 @@ class Sim {
 public:
 	Sim();
 
-	virtual void init();
+	~Sim();
 
-	virtual void Solve();
+	void init() {};
 
-	virtual void Simulate(float dt);
+	void Solve();
 
-	virtual void Draw();
+	void Simulate(float dt);
 
-	virtual void Operate(float dt);
+	void Draw();
+
+	void Operate(float dt, int stop);
+
+	void ResolveCollison();
+
+	void RecomputeBoundingBox();
 
 private:
 	std::vector<Object *> objects;
+
+	bool IsInCollision(AABB *cube1, AABB *cube2);
 };

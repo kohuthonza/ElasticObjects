@@ -5,18 +5,13 @@
 
 #include <vector>
 
-typedef struct AABB {
-	glm::vec3 min;
-	glm::vec3 max;
-} AABB;
-
 class Plane {
 public:
 	Plane(const glm::vec3 & color, float planeHeight);
 
-	void Draw();
+	Plane(glm::vec3 normal, glm::vec3 point1, glm::vec3 point2, float size);
 
-	AABB GetAABB() const { return AABB{ min, max }; }
+	void Draw();
 
 	~Plane();
 

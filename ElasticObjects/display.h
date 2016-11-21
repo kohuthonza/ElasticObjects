@@ -9,7 +9,7 @@ class Display {
 public:
 	Display(int w, int h, const std::string &name);
 
-	void Update(Camera &camera);
+	void Update(Camera &camera, int *stopSimFlag);
 
 	bool IsClosed();
 

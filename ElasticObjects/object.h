@@ -9,9 +9,16 @@
 
 using glm::vec3;
 
+typedef struct AABB {
+	vec3 min;
+	vec3 max;
+};
+
 class Object {
 public:
 	Object() {};
+
+	Object(glm::vec3 normal, glm::vec3 point1, glm::vec3 point2, float size);
 
 	void AddVertex(Vertex *vertex);
 
@@ -29,7 +36,21 @@ public:
 
 	void Draw();
 
+	void GenerateBoundingBox();
+
+	void ResolveVertices(Object *other);
+
+	std::vector<Vertex *> &GetVerts() { return verts; }
+
+	AABB *GetAABB() { return &aabbCoords; }
+
 private:
+	AABB aabbCoords;
+
+	bool isPlane = false;
+	vec3 normal;
+	vec3 pointOnPlane;
+
 	const vec3 gravitation = vec3(0, -9.81f, 0);
 	const float airFrictionConstant = 0.2f;
 
