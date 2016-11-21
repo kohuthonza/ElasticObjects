@@ -97,4 +97,8 @@
     <None Include="basic.fs" />
     <None Include="basic.vs" />
   </ItemGroup>
+  <ItemGroup>
+    <Object Include="obj_models\simple_cube.obj" />
+    <Object Include="obj_models\simple_sphere.obj" />
+  </ItemGroup>
 </Project>

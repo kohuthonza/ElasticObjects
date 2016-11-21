@@ -20,32 +20,19 @@ void Object::InitOBJTest() {
 	OBJ_Loader obj("obj_models\\simple_sphere.obj");
 	vertices = obj.getVertices();
 	indices = obj.getIndices();
-	//obj.getNormals();
+	//normals = obj.getNormals();
 
-	for (std::vector<glm::vec3>::iterator it = vertices.begin(); it != vertices.end(); ++it) {
-		verts.push_back(new Vertex( (*it) , vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	}
-
-	//vertices.push_back(glm::vec3(-1.0, -1.0, 1.0));
-	//vertices.push_back(glm::vec3(1.0, -1.0, 1.0));
-	//vertices.push_back(glm::vec3(1.0, 1.0, 1.0));
-	//vertices.push_back(glm::vec3(-1.0, 1.0, 1.0));
-
-	//indices.push_back(0);
-	//indices.push_back(2);
-	//indices.push_back(1);
-
-	//indices.push_back(0);
-	//indices.push_back(3);
-	//indices.push_back(2);
-
-	for (int i = 0; i < obj.getVerticesNumber(); i++) {
-		for (int j = 0; j < obj.getVerticesNumber(); j++) {
-			AddSpring(i, j, 100.0f);
-		}
+	for (auto &i : vertices) {
+		verts.push_back(new Vertex( i, vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f ) );
 	}
 	
 	for (int i = 0; i < obj.getVerticesNumber(); i++) {
+		for (int j = 0; j < obj.getVerticesNumber(); j++ ) {
+			AddSpring(i, j, 1.0f);
+		}
+	}
+	
+ 	for (int i = 0; i < obj.getVerticesNumber(); i++) {
 		colors.push_back(red);
 	}
 	
