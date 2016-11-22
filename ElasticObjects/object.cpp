@@ -27,10 +27,10 @@ Object::Object(glm::vec3 $normal, glm::vec3 point1, glm::vec3 point2, float D){
 	indices.push_back(2);
 	indices.push_back(3);
 
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 0.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
 
 	glGenVertexArrays(1, &vertexArrayObject);
 	glBindVertexArray(vertexArrayObject);
@@ -385,13 +385,14 @@ void Object::ResolveVertices(Object * other) {
 			planeObject = other;
 			generalObject = this;
 		}
-		std::cout << "plane col" << std::endl;
+		
 
 		for (unsigned int i = 0; i < generalObject->GetVerts().size(); ++i) {
-			vec3 distance = (generalObject->GetVerts()[i]->pos - planeObject->pointOnPlane) * planeObject->normal;
+			float distance = glm::dot((generalObject->GetVerts()[i]->pos - planeObject->pointOnPlane), planeObject->normal);
 			//std::cout << "vertex " << i << " dist " << distance.x << " " << distance.y << " " << distance.z << std::endl;
 
-			if (distance.y < 0.5f) {
+			if (distance < 1.5f) {				
+				std::cout << "plane col ... bouncing" << std::endl;
 				vec3 v;
 				v = generalObject->GetVerts()[i]->vel;
 
