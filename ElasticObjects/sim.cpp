@@ -3,12 +3,18 @@
 #include <iostream>
 
 Sim::Sim() {
-	objects.push_back(new Object(glm::vec3(0, 1, 0), glm::vec3(0, -3.5, -1), glm::vec3(3, -3.5, -1), 5.f));
-	objects[0]->GenerateBoundingBox();
+	//objects.push_back(new Object(glm::vec3(1, 0, 0), glm::vec3(3, -2.5, -1), glm::vec3(3, -4.5, -1), 5.f));
+	//objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object());
-	objects[1]->InitOBJTest();
-	objects[1]->GenerateBoundingBox();	
+	objects.back()->InitOBJTest();
+	objects.back()->GenerateBoundingBox();
+
+	objects.push_back(new Object(glm::vec3(0, -1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));
+	objects.back()->GenerateBoundingBox();
+
+	//objects.push_back(new Object(glm::vec3(0, 0, 1), glm::vec3(0, 2.5, -2), glm::vec3(3, 2.5, -2), 5.f));
+	//objects.back()->GenerateBoundingBox();
 }
 
 Sim::~Sim(){
@@ -49,7 +55,6 @@ void Sim::ResolveCollison(){
 			auto object2AABB = objects[j]->GetAABB();	
 
 			if (IsInCollision(object1AABB, object2AABB)) {
-				//std::cout << i << " and " << j << " are in collision" << std::endl;
 				objects[i]->ResolveVertices(objects[j]);
 			}
 		}
