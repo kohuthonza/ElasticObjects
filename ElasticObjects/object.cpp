@@ -105,9 +105,47 @@ inline void Object::AddIndex(GLushort index) {
 }
 
 inline void Object::AddSpring(int point1, int point2, float springConstat) {
-	springs.push_back(new Spring(verts[point1], verts[point2], glm::distance(verts[point2]->pos, verts[point1]->pos), springConstat));
+	springs.push_back(new Spring(point1, point2, verts[point1], verts[point2], glm::distance(verts[point2]->pos, verts[point1]->pos), springConstat));
 }
 
+bool Object::SpringExists(int point1, int point2) {
+	for (unsigned int i = 0; i < springs.size(); ++i) {
+		if (springs[i]->Index1() == point1 && springs[i]->Index2() == point2)
+			return true;
+		if (springs[i]->Index1() == point2 && springs[i]->Index2() == point1)
+			return true;
+	}
+
+	return false;
+}
+
+void Object::GenerateSprings() {
+	
+	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces to add springs. Each edge is represented by one spring.
+		unsigned int vert_index[3];
+
+		vert_index[0] = indices[i];
+		vert_index[1] = indices[i + 1];
+		vert_index[2] = indices[i + 2];
+
+		// 0 1 spring
+		if (!SpringExists(vert_index[0], vert_index[1])) {
+			AddSpring(vert_index[0], vert_index[1], 100.2f);
+		}
+
+		// 1 2 spring
+		if (!SpringExists(vert_index[1], vert_index[2])) {
+			AddSpring(vert_index[1], vert_index[2], 100.2f);
+		}
+
+		// 2 0 spring
+		if (!SpringExists(vert_index[2], vert_index[0])) {
+			AddSpring(vert_index[2], vert_index[0], 100.2f);
+		}
+	}
+
+	std::cout << "Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
+}
 void Object::InitOBJTest() {
 
 	OBJ_Loader obj("obj_models\\simple_sphere.obj");
@@ -115,27 +153,15 @@ void Object::InitOBJTest() {
 	indices = obj.getIndices();
 	normals = obj.getNormals();
 
-	//std::cout << "Normals size: " << normals.size() << std::endl;
-	//std::cout << "Indices size: " << indices.size() << std::endl;
+	std::cout << "Normals size: " << normals.size() << std::endl;
+	std::cout << "Indices size: " << indices.size() << std::endl;
+	std::cout << "Vertices size: " << vertices.size() << std::endl;
 
 	for (auto &i : vertices) {
 		verts.push_back(new Vertex( i, vec3(0.0, -2.0, 0.0), vec3(0.0, 0.0, 0.0), 1.1f ) );
 	}
 	
-	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
-		unsigned int vert_index[3];
-
-		vert_index[0] = indices[i];
-		vert_index[1] = indices[i + 1];
-		vert_index[2] = indices[i + 2];
-		
-
-	}
-	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
-		for (unsigned int j = 0; j < obj.getVerticesNumber(); j++ ) {
-			AddSpring(i, j, 100.2f);
-		}
-	}
+	GenerateSprings();
 	
  	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
 		colors.push_back(red);

@@ -50,6 +50,8 @@ public:
 
 	bool SpringExists(int point1, int point2);
 
+	void GenerateSprings();
+
 private:
 	AABB aabbCoords;
 
