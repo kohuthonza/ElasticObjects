@@ -1,6 +1,8 @@
 ﻿#include "object.h"
 #include "OBJ_Loader.h"
 #include <iostream>
+#include <random>
+#include <chrono>
 
 float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 	glm::vec3 VectorAB = A - B;
@@ -43,6 +45,14 @@ Object::Object(glm::vec3 $normal, glm::vec3 point1, glm::vec3 point2, float D){
 	vertices.push_back(point1 + tangent*D + bitangent*D);
 	vertices.push_back(point1 - tangent*D + bitangent*D);
 
+	std::mt19937_64 rng;
+	uint64_t timeSeed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+	std::seed_seq ss{ uint32_t(timeSeed & 0xffffffff), uint32_t(timeSeed >> 32) };
+	rng.seed(ss);
+	std::uniform_real_distribution<float> unif(0, 1);
+
+	vec3 color( unif(rng), unif(rng), unif(rng));
+
 	verts.push_back(new Vertex(vertices[0], vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
 	verts.push_back(new Vertex(vertices[1], vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
 	verts.push_back(new Vertex(vertices[2], vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
@@ -55,10 +65,10 @@ Object::Object(glm::vec3 $normal, glm::vec3 point1, glm::vec3 point2, float D){
 	indices.push_back(2);
 	indices.push_back(3);
 
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
-	colors.push_back(glm::vec3(1.0f, 1.0f, 0.0f));
+	colors.push_back(color);
+	colors.push_back(color);
+	colors.push_back(color);
+	colors.push_back(color);
 
 	glGenVertexArrays(1, &vertexArrayObject);
 	glBindVertexArray(vertexArrayObject);
@@ -109,7 +119,7 @@ void Object::InitOBJTest() {
 	//std::cout << "Indices size: " << indices.size() << std::endl;
 
 	for (auto &i : vertices) {
-		verts.push_back(new Vertex( i, vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f ) );
+		verts.push_back(new Vertex( i, vec3(0.0, -2.0, 0.0), vec3(0.0, 0.0, 0.0), 1.1f ) );
 	}
 	
 	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
@@ -123,7 +133,7 @@ void Object::InitOBJTest() {
 	}
 	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
 		for (unsigned int j = 0; j < obj.getVerticesNumber(); j++ ) {
-			AddSpring(i, j, 1.0f);
+			AddSpring(i, j, 100.2f);
 		}
 	}
 	
@@ -179,12 +189,12 @@ void Object::InitTest() {
 	indices.push_back(3);
 	indices.push_back(2);
 
-	AddSpring(0, 1, 100.0f);
-	AddSpring(1, 2, 100.0f);
-	AddSpring(3, 2, 100.0f);
-	AddSpring(0, 3, 100.0f);
-	AddSpring(0, 2, 100.0f);
-	AddSpring(1, 3, 100.0f);
+	AddSpring(0, 1, 1000.0f);
+	AddSpring(1, 2, 1000.0f);
+	AddSpring(3, 2, 1000.0f);
+	AddSpring(0, 3, 1000.0f);
+	AddSpring(0, 2, 1000.0f);
+	AddSpring(1, 3, 1000.0f);
 
 	colors.push_back(red);
 	colors.push_back(red);
@@ -376,48 +386,6 @@ void Object::Simulate(float dt) {
 		vertices[i] = verts[i]->pos;
 
 		verts[i]->force = vec3(0, 0, 0);
-
-		/*if (verts[i]->pos.y < -3.5f) {
-			vec3 v;
-			v = verts[i]->vel;
-
-			v.y = 0.0f;
-
-			verts[i]->ApplyForce(-v * 0.2f);
-
-			v = verts[i]->vel;
-			v.x = 0;
-			v.z = 0;
-
-			if (v.y < 1.0f) {
-				verts[i]->ApplyForce(-v* 2.0f);
-			}
-
-			vec3 force = vec3(0, 100.0f, 0) * (-3.5f - verts[i]->pos.y);
-
-			verts[i]->ApplyForce(force);
-		}*/
-
-		//from here
-		/*if (masses[a]->GetPos().y < groundHeight) {
-		vec3 v;
-		v = masses[a]->GetVel();
-
-		v.y = 0;
-
-		masses[a]->ApplyForce(-v * groundFrictionConstant);
-
-		v = masses[a]->GetVel();
-		v.x = 0;
-		v.z = 0;
-
-		if (v.y < 0)
-		masses[a]->ApplyForce(-v*groundAbsorptionConstant);
-
-		vec3 force = vec3(0, groundRepulsionConstant, 0) * (groundHeight - masses[a]->GetPos().y);
-
-		masses[a]->ApplyForce(force);
-		}*/
 	}
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
@@ -438,7 +406,7 @@ void Object::GenerateBoundingBox(){
 	for (unsigned int i = 0; i < vertices.size(); ++i) {
 		if (vertices[i].x < tempMin.x) tempMin.x = vertices[i].x;
 		if (vertices[i].y < tempMin.y) tempMin.y = vertices[i].y;
-		if (vertices[i].z < tempMin.z) tempMin.z = vertices[i].y;
+		if (vertices[i].z < tempMin.z) tempMin.z = vertices[i].z;
 
 		if (vertices[i].x > tempMax.x) tempMax.x = vertices[i].x;
 		if (vertices[i].y > tempMax.y) tempMax.y = vertices[i].y;
@@ -450,6 +418,7 @@ void Object::GenerateBoundingBox(){
 }
 
 void Object::ResolveVertices(Object * other) {
+	
 	if (isPlane || other->isPlane) {
 		Object *planeObject;
 		Object *generalObject;
@@ -465,28 +434,17 @@ void Object::ResolveVertices(Object * other) {
 
 		for (unsigned int i = 0; i < generalObject->GetVerts().size(); ++i) {
 			float distance = glm::dot((generalObject->GetVerts()[i]->pos - planeObject->pointOnPlane), planeObject->normal);
-			//std::cout << "vertex " << i << " dist " << distance.x << " " << distance.y << " " << distance.z << std::endl;
 
-			if (distance < 1.5f) {				
-				std::cout << "plane col ... bouncing" << std::endl;
-				vec3 v;
-				v = generalObject->GetVerts()[i]->vel;
+			if (abs(distance) < 0.5f) {				
+				vec3 rv = -generalObject->GetVerts()[i]->vel;
+				float velAlongNormal = glm::dot(rv, planeObject->normal);
+				float e = 0.1f;
 
-				v.y = 0.0f;
+				float j = -(1.0f - e) * velAlongNormal;
+				j /= 1 / generalObject->GetVerts()[i]->mass;
 
-				generalObject->GetVerts()[i]->ApplyForce(-v * 0.2f);
-
-				v = generalObject->GetVerts()[i]->vel;
-				v.x = 0;
-				v.z = 0;
-
-				if (v.y < 1.0f) {
-					generalObject->GetVerts()[i]->ApplyForce(-v* 2.0f);
-				}
-
-				vec3 force = vec3(0, 100.0f, 0) * (-3.5f - generalObject->GetVerts()[i]->pos.y);
-
-				generalObject->GetVerts()[i]->ApplyForce(force);
+				vec3 impulse = j * planeObject->normal;
+				generalObject->GetVerts()[i]->vel -= (1.0f / generalObject->GetVerts()[i]->mass) * impulse;
 			}
 		}		
 	}
@@ -495,7 +453,7 @@ void Object::ResolveVertices(Object * other) {
 			for (unsigned int j = 0; j < other->GetVerts().size(); ++j) {
 				float dist = glm::distance(verts[i]->pos, other->GetVerts()[j]->pos);
 				if (dist <= 1.f) {
-					std::cout << "vertex " << i << " and " << j << " are in col" << std::endl;
+					//std::cout << "vertex " << i << " and " << j << " are in col" << std::endl;
 				}
 			}
 		}
