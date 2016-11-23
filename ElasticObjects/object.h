@@ -46,12 +46,18 @@ public:
 
 	AABB *GetAABB() { return &aabbCoords; }
 
+	void CalculateBodyVolume();
+
+	bool SpringExists(int point1, int point2);
+
 private:
 	AABB aabbCoords;
 
 	bool isPlane = false;
 	vec3 normal;
 	vec3 pointOnPlane;
+
+	float Volume;
 
 	const vec3 gravitation = vec3(0, -9.81f, 0);
 	const float airFrictionConstant = 0.2f;

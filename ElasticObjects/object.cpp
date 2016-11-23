@@ -1,6 +1,34 @@
-#include "object.h"
+﻿#include "object.h"
 #include "OBJ_Loader.h"
 #include <iostream>
+
+float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
+	glm::vec3 VectorAB = A - B;
+	glm::vec3 VectorAC = A - C;
+
+	glm::vec3 CrossProduct = glm::cross(VectorAB, VectorAC);
+	
+	return 0.5 * glm::length(CrossProduct);
+}
+
+
+void Object::CalculateBodyVolume() {
+	/*
+	* For more information refer to Gauss theorem - "with closed shapes we
+	*	are able to replace integration over volume by integration
+	*	over surface of the body".
+	*/
+
+
+	/*
+	* Number of edges? (refer to eulers formula)
+	* 3 faces = 2 edges 
+	* E = 3/2 F = 3/2 * |indices|/3
+	*/
+
+}
+
+
 
 Object::Object(glm::vec3 $normal, glm::vec3 point1, glm::vec3 point2, float D){
 	isPlane = true;
@@ -75,12 +103,24 @@ void Object::InitOBJTest() {
 	OBJ_Loader obj("obj_models\\simple_sphere.obj");
 	vertices = obj.getVertices();
 	indices = obj.getIndices();
-	//normals = obj.getNormals();
+	normals = obj.getNormals();
+
+	//std::cout << "Normals size: " << normals.size() << std::endl;
+	//std::cout << "Indices size: " << indices.size() << std::endl;
 
 	for (auto &i : vertices) {
 		verts.push_back(new Vertex( i, vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f ) );
 	}
 	
+	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
+		unsigned int vert_index[3];
+
+		vert_index[0] = indices[i];
+		vert_index[1] = indices[i + 1];
+		vert_index[2] = indices[i + 2];
+		
+
+	}
 	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
 		for (unsigned int j = 0; j < obj.getVerticesNumber(); j++ ) {
 			AddSpring(i, j, 1.0f);
@@ -115,6 +155,7 @@ void Object::InitOBJTest() {
 
 	glBindVertexArray(0);
 }
+
 
 
 void Object::InitTest() {
@@ -289,10 +330,45 @@ void Object::Simulate(float dt) {
 	if (isPlane)
 		return;
 
+	/*
+	* Calculate and accumulate gravity and spring forces
+	*	for all particles.
+	*/
 	for (unsigned int i = 0; i < verts.size(); ++i) {
 		verts[i]->ApplyForce(gravitation * verts[i]->mass);
 		verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
+	}
+	/*
+	*  Simulate ideal gas pressure from the inside of the object
+	*/
+	for (unsigned int i = 0; i < indices.size(); i+=3) { // loop over all faces
+		glm::vec3 v[3];
+		
+		v[0] = vertices[indices[ i ]];
+		v[1] = vertices[indices[ i + 1 ]];
+		v[2] = vertices[indices[ i + 2 ]];
 
+		//Calculate the pressure value
+		const float Na = 6.02214e23; //- Avogardo number
+		const float kb = 1.380648e-23; //- Bolzman konstant
+		float Temperature = 295.0; //- Kelvin temperature
+		
+		float R = Na * kb;
+
+		//float Force = n R T Ve-1
+		glm::vec3 GasPressureForce = normals[i / 3] * R * Temperature / Volume;
+
+		//Loop over particles which define the face
+
+		//Multiply result by field of the face and ˆn
+		float Area = TriangleArea(v[0], v[1], v[2]);
+
+		//Accumulate finally pressure force to the particle.
+
+	}
+
+
+	for (unsigned int i = 0; i < verts.size(); ++i) {
 		verts[i]->vel += (verts[i]->force / verts[i]->mass) * dt;
 		vec3 newPosVector = verts[i]->vel * dt;
 		verts[i]->pos += newPosVector;
