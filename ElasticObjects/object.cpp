@@ -156,7 +156,8 @@ void Object::GenerateSprings() {
 
 	std::cout << "Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
 }
-void Object::InitOBJTest() {
+
+void Object::InitOBJTest(glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
 
 	OBJ_Loader obj("obj_models\\simple_sphere.obj");
 	vertices = obj.getVertices();
@@ -168,7 +169,7 @@ void Object::InitOBJTest() {
 	std::cout << "Vertices size: " << vertices.size() << std::endl;
 
 	for (auto &i : vertices) {
-		verts.push_back(new Vertex( i, vec3(0.0, -2.0, 0.0), vec3(0.0, 0.0, 0.0), 1.1f ) );
+		verts.push_back(new Vertex( i + offset, vec3(0.0, 0.0, 0.0) + initialVel, vec3(0.0, 0.0, 0.0), 1.1f ) );
 	}
 	
 	GenerateSprings();
@@ -438,7 +439,6 @@ void Object::Draw() {
 }
 
 void Object::GenerateBoundingBox(){
-	//std::cout << "generating BB's" << std::endl;
 	vec3 tempMin = vertices[0];
 	vec3 tempMax = vertices[0];
 
@@ -454,6 +454,10 @@ void Object::GenerateBoundingBox(){
 	
 	aabbCoords.max = tempMax;
 	aabbCoords.min = tempMin;
+}
+
+static vec3 projectUonV(vec3 u, vec3 v) {
+	return ( v * (glm::dot(u, v)/glm::dot(v, v)) );
 }
 
 void Object::ResolveVertices(Object * other) {
@@ -491,8 +495,24 @@ void Object::ResolveVertices(Object * other) {
 		for (unsigned int i = 0; i < verts.size(); ++i) {
 			for (unsigned int j = 0; j < other->GetVerts().size(); ++j) {
 				float dist = glm::distance(verts[i]->pos, other->GetVerts()[j]->pos);
-				if (dist <= 1.f) {
-					//std::cout << "vertex " << i << " and " << j << " are in col" << std::endl;
+				if (dist <= 0.5f) {
+					auto ObjectA = verts[i];
+					auto ObjectB = other->GetVerts()[j];
+
+					vec3 nv1, nv2;
+
+					nv1 = ObjectA->vel;
+					nv1 += projectUonV(ObjectB->vel, ObjectB->pos - ObjectA->pos);
+					nv1 -= projectUonV(ObjectA->vel, ObjectA->pos - ObjectB->pos);
+
+					nv2 = ObjectB->vel;
+					nv2 += projectUonV(ObjectA->vel, ObjectB->pos - ObjectA->pos);
+					nv2 -= projectUonV(ObjectB->vel, ObjectA->pos - ObjectB->pos);
+
+					ObjectA->vel = nv1;
+					ObjectB->vel = nv2;
+
+					std::cout << "vertex " << i << " and " << j << " are in col" << std::endl;
 				}
 			}
 		}

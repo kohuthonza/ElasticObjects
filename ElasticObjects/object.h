@@ -30,7 +30,7 @@ public:
 
 	void InitTestHexa();
 
-	void InitOBJTest();
+	void InitOBJTest(glm::vec3 offset, glm::vec3 initialVel );
 
 	void Solve();
 
