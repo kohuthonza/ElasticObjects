@@ -15,6 +15,12 @@ float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 
 
 void Object::CalculateBodyVolume() {
+	
+	assert(springs.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
+	assert(vertices.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
+	assert(indices.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
+	assert(verts.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
+	
 	/*
 	* For more information refer to Gauss theorem - "with closed shapes we
 	*	are able to replace integration over volume by integration
@@ -121,6 +127,10 @@ bool Object::SpringExists(int point1, int point2) {
 
 void Object::GenerateSprings() {
 	
+	assert(vertices.size() > 0 && "Spring generation can only be done with initialized buffers.");
+	assert(indices.size() > 0 && "Spring generation can only be done with initialized buffers.");
+	assert(verts.size() > 0 && "Spring generation can only be done with initialized buffers.");
+
 	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces to add springs. Each edge is represented by one spring.
 		unsigned int vert_index[3];
 
@@ -162,6 +172,8 @@ void Object::InitOBJTest() {
 	}
 	
 	GenerateSprings();
+
+	CalculateBodyVolume();
 	
  	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
 		colors.push_back(red);
@@ -374,6 +386,7 @@ void Object::Simulate(float dt) {
 		verts[i]->ApplyForce(gravitation * verts[i]->mass);
 		verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
 	}
+
 	/*
 	*  Simulate ideal gas pressure from the inside of the object
 	*/
@@ -387,12 +400,12 @@ void Object::Simulate(float dt) {
 		//Calculate the pressure value
 		const float Na = 6.02214e23; //- Avogardo number
 		const float kb = 1.380648e-23; //- Bolzman konstant
-		float Temperature = 295.0; //- Kelvin temperature
+		float Temperature = 295.0; //- Temperature in Kelvin
 		
 		float R = Na * kb;
 
 		//float Force = n R T Ve-1
-		glm::vec3 GasPressureForce = normals[i / 3] * R * Temperature / Volume;
+		glm::vec3 GasPressureForce = normals[i / 3] * R * Temperature / BodyVolume;
 
 		//Loop over particles which define the face
 
