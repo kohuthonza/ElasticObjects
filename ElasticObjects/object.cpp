@@ -13,9 +13,60 @@ float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 	return 0.5 * glm::length(CrossProduct);
 }
 
-bool Object::VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 V0, glm::vec3 V1, /* TRIANGLE: */ glm::vec3 TA, glm::vec3 TB, glm::vec3 TC) {
-	/* Source: http://geomalgorithms.com/a06-_intersect-2.html */
+bool Object::VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 Origin, glm::vec3 Dir, /* TRIANGLE: */ glm::vec3 TA, glm::vec3 TB, glm::vec3 TC) {
+	/* Source: https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution */
 
+	// compute plane's normal
+	glm::vec3 TATB = TB - TA;
+	glm::vec3 TATC = TC - TA;
+
+	// no need to normalize
+	glm::vec3 N = glm::cross(TATB, TATC);
+	float area2 = N.length();
+
+	// Step 1: finding P
+
+	// check if ray and plane are parallel ?
+	float kEpsilon = 0.0002;
+	float NdotRayDirection = glm::dot(N, Dir);
+	if (fabs(NdotRayDirection) < kEpsilon) // almost 0 
+		return false; // they are parallel so they don't intersect ! 
+
+	// compute d parameter using equation 2
+	float d = glm::dot(N, TA);
+
+	// compute t (equation 3)
+	float t = (glm::dot(N, Origin) + d) / NdotRayDirection;
+	// check if the triangle is in behind the ray
+	if (t < 0) return false; // the triangle is behind 
+
+	// compute the intersection point using equation 1
+	glm::vec3 P = Origin + t * Dir;
+
+
+
+	// Step 2: inside-outside test
+	glm::vec3 C; // vector perpendicular to triangle's plane 
+
+	// edge 0
+	glm::vec3 edge0 = TB - TA;
+	glm::vec3 vp0 = P - TA;
+	C = glm::cross(edge0, vp0);
+	if (glm::dot(N, C) < 0) return false; // P is on the right side 
+
+	// edge 1
+	glm::vec3 edge1 = TC - TB;
+	glm::vec3 vp1 = P - TB;
+	C = glm::cross(edge1, vp1);
+	if (glm::dot(N, C) < 0)  return false; // P is on the right side 
+
+	// edge 2
+	glm::vec3 edge2 = TA - TC;
+	glm::vec3 vp2 = P - TC;
+	C = glm::cross(edge2, vp2);
+	if (glm::dot(N, C) < 0) return false; // P is on the right side; 
+
+	return true; // this ray hits the triangle 
 }
 
 bool Object::IsInside(glm::vec3 point) {
@@ -28,6 +79,22 @@ bool Object::IsInside(glm::vec3 point) {
 	* lets assume there is a vector from given point in any direction; count number of triagles whose body is intersected by the vector
 	* From the number of intersected triangles we can easily determine if the point is inside or not.
 	*/
+
+	glm::vec3 Direction(1.0, 1.0, 1.0);
+	int intersects = 0;
+
+	for (unsigned int i = 0; i < indices.size(); i += 3) {
+		unsigned int vert_index[3];
+
+		vert_index[0] = indices[i];
+		vert_index[1] = indices[i + 1];
+		vert_index[2] = indices[i + 2];
+		
+		if (VectorIntersectsTriangle(point, Direction, /* TRIANGLE: */ vertices[vert_index[0]], vertices[vert_index[1]], vertices[vert_index[2]]))
+			intersects++;
+	}
+	std::cout << "Intersects count: " << intersects << std::endl;
+	return true;
 }
 
 void Object::CalculateBodyVolume() {
@@ -37,6 +104,19 @@ void Object::CalculateBodyVolume() {
 	assert(indices.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
 	assert(verts.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
 	
+	std::cout << "Calculating volume body, might take a while..." << std::endl;
+	
+	IsInside(glm::vec3(0.0, 0.0, -0.5));
+	IsInside(glm::vec3(0.0, 0.0, 0.0));
+	IsInside(glm::vec3(0.0, 0.0, 0.5));
+	IsInside(glm::vec3(0.0, 0.0, 1.0));
+	IsInside(glm::vec3(0.0, 0.0, 2.0));
+	IsInside(glm::vec3(0.0, 0.0, 3.0));
+	IsInside(glm::vec3(0.0, 0.0, 4.0));
+	IsInside(glm::vec3(0.0, 0.0, 5.0));
+	IsInside(glm::vec3(0.0, 0.0, 6.0));
+	IsInside(glm::vec3(0.0, 0.0, 7.0));
+	IsInside(glm::vec3(0.0, 0.0, 8.0));
 	/*
 	* Calculate body volume using Monte Carlo method 
 	*
