@@ -13,6 +13,22 @@ float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 	return 0.5 * glm::length(CrossProduct);
 }
 
+bool Object::VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 V0, glm::vec3 V1, /* TRIANGLE: */ glm::vec3 TA, glm::vec3 TB, glm::vec3 TC) {
+	/* Source: http://geomalgorithms.com/a06-_intersect-2.html */
+
+}
+
+bool Object::IsInside(glm::vec3 point) {
+	/*
+	* Returns TRUE if given point is inside of the object
+	* Otherwise returns FALSE
+	*/
+
+	/*
+	* lets assume there is a vector from given point in any direction; count number of triagles whose body is intersected by the vector
+	* From the number of intersected triangles we can easily determine if the point is inside or not.
+	*/
+}
 
 void Object::CalculateBodyVolume() {
 	
@@ -22,17 +38,23 @@ void Object::CalculateBodyVolume() {
 	assert(verts.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
 	
 	/*
-	* For more information refer to Gauss theorem - "with closed shapes we
-	*	are able to replace integration over volume by integration
-	*	over surface of the body".
+	* Calculate body volume using Monte Carlo method 
+	*
 	*/
 
+	// we have a bounding-box of the object, entire object is expected to be in the bounding-box
+	// lets
 
-	/*
-	* Number of edges? (refer to eulers formula)
-	* 3 faces = 2 edges 
-	* E = 3/2 F = 3/2 * |indices|/3
-	*/
+	float BoundingBoxVolume = /* TODO */ 1.0;
+	const int NumberIterations = 1000; 
+
+	for (int i = 0; i < NumberIterations; i++) {
+		// generate random point inside of the bounding box
+		// is the point inside or outside of the objects?
+		// if(IsInside) inside++;
+	}
+	// result = BoundingBoxVolume * (inside/NumberIterations)
+
 
 }
 

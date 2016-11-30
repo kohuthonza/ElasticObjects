@@ -52,6 +52,10 @@ public:
 
 	void GenerateSprings();
 
+	bool IsInside(glm::vec3 point);
+
+	bool VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 V0, glm::vec3 V1, /* TRIANGLE: */ glm::vec3 TA, glm::vec3 TB, glm::vec3 TC);
+
 private:
 	AABB aabbCoords;
 
