@@ -93,8 +93,15 @@ bool Object::IsInside(glm::vec3 point) {
 		if (VectorIntersectsTriangle(point, Direction, /* TRIANGLE: */ vertices[vert_index[0]], vertices[vert_index[1]], vertices[vert_index[2]]))
 			intersects++;
 	}
-	std::cout << "Intersects count: " << intersects << std::endl;
-	return true;
+	
+	if (intersects % 2 == 0) {
+		// out
+		return false;
+	}
+	else {
+		// in
+		return true;
+	}
 }
 
 void Object::CalculateBodyVolume() {
@@ -105,18 +112,8 @@ void Object::CalculateBodyVolume() {
 	assert(verts.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
 	
 	std::cout << "Calculating volume body, might take a while..." << std::endl;
+
 	
-	IsInside(glm::vec3(0.0, 0.0, -0.5));
-	IsInside(glm::vec3(0.0, 0.0, 0.0));
-	IsInside(glm::vec3(0.0, 0.0, 0.5));
-	IsInside(glm::vec3(0.0, 0.0, 1.0));
-	IsInside(glm::vec3(0.0, 0.0, 2.0));
-	IsInside(glm::vec3(0.0, 0.0, 3.0));
-	IsInside(glm::vec3(0.0, 0.0, 4.0));
-	IsInside(glm::vec3(0.0, 0.0, 5.0));
-	IsInside(glm::vec3(0.0, 0.0, 6.0));
-	IsInside(glm::vec3(0.0, 0.0, 7.0));
-	IsInside(glm::vec3(0.0, 0.0, 8.0));
 	/*
 	* Calculate body volume using Monte Carlo method 
 	*
@@ -124,18 +121,41 @@ void Object::CalculateBodyVolume() {
 
 	// we have a bounding-box of the object, entire object is expected to be in the bounding-box
 	// lets
+	AABB *BBCoords = GetAABB();
+		
+	float BoundingBoxSizeX = fabs(BBCoords->max.x - BBCoords->min.x);
+	float BoundingBoxSizeY = fabs(BBCoords->max.y - BBCoords->min.y);
+	float BoundingBoxSizeZ = fabs(BBCoords->max.z - BBCoords->min.z);
+	
+	float BoundingBoxVolume =  BoundingBoxSizeX * BoundingBoxSizeY * BoundingBoxSizeZ;
+	
+	std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
 
-	float BoundingBoxVolume = /* TODO */ 1.0;
+	std::cout << "BBox size x: " << fabs(BBCoords->max.x - BBCoords->min.x) << std::endl;
+	std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
+	std::cout << "BBox size z: " << fabs(BBCoords->max.z - BBCoords->min.z) << std::endl;
+
 	const int NumberIterations = 1000; 
+	int hit = 0;
 
 	for (int i = 0; i < NumberIterations; i++) {
+		float rx = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float ry = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		float rz = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+		
 		// generate random point inside of the bounding box
+		float xCoord = BBCoords->min.x + rx * BoundingBoxSizeX;
+		float yCoord = BBCoords->min.y + ry * BoundingBoxSizeY;
+		float zCoord = BBCoords->min.z + rz * BoundingBoxSizeZ;
+		
 		// is the point inside or outside of the objects?
-		// if(IsInside) inside++;
+		if (IsInside(glm::vec3(xCoord, yCoord, zCoord))) {
+			hit++;
+		}
 	}
-	// result = BoundingBoxVolume * (inside/NumberIterations)
+	BodyVolume = BoundingBoxVolume * ((float)hit / (float)NumberIterations);
 
-
+	std::cout << "Body volume: " << BodyVolume << std::endl;
 }
 
 
@@ -274,6 +294,8 @@ void Object::InitOBJTest(glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initia
 		verts.push_back(new Vertex( i + offset, vec3(0.0, 0.0, 0.0) + initialVel, vec3(0.0, 0.0, 0.0), 1.1f ) );
 	}
 	
+	GenerateBoundingBox();
+
 	GenerateSprings();
 
 	CalculateBodyVolume();
