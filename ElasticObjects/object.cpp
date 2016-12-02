@@ -13,60 +13,51 @@ float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 	return 0.5 * glm::length(CrossProduct);
 }
 
-bool Object::VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 Origin, glm::vec3 Dir, /* TRIANGLE: */ glm::vec3 TA, glm::vec3 TB, glm::vec3 TC) {
-	/* Source: https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle/ray-triangle-intersection-geometric-solution */
+bool Object::VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 Origin, glm::vec3 Dir, /* TRIANGLE: */ glm::vec3 V1, glm::vec3 V2, glm::vec3 V3) {
+	/* Möller–Trumbore intersection algorithm, pseudo-code source: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm */
 
-	// compute plane's normal
-	glm::vec3 TATB = TB - TA;
-	glm::vec3 TATC = TC - TA;
+#define EPSILON 0.0001
 
-	// no need to normalize
-	glm::vec3 N = glm::cross(TATB, TATC);
-	float area2 = N.length();
+	glm::vec3 e1, e2;  //Edge1, Edge2
+	glm::vec3 P, Q, T;
+	float det, inv_det, u, v;
+	float t;
 
-	// Step 1: finding P
+	//Find vectors for two edges sharing V1
+	e1 = V2 - V1;
+	e2 = V3 - V1;
+	//Begin calculating determinant - also used to calculate u parameter
+	P = glm::cross(Dir, e2);
+	//if determinant is near zero, ray lies in plane of triangle or ray is parallel to plane of triangle
+	det = glm::dot(e1, P);
+	//NOT CULLING
+	if (det > -EPSILON && det < EPSILON) return false;
+	inv_det = 1.f / det;
 
-	// check if ray and plane are parallel ?
-	float kEpsilon = 0.0002;
-	float NdotRayDirection = glm::dot(N, Dir);
-	if (fabs(NdotRayDirection) < kEpsilon) // almost 0 
-		return false; // they are parallel so they don't intersect ! 
+	//calculate distance from V1 to ray origin
+	T =  Origin - V1;
 
-	// compute d parameter using equation 2
-	float d = glm::dot(N, TA);
+	//Calculate u parameter and test bound
+	u = glm::dot(T, P) * inv_det;
+	//The intersection lies outside of the triangle
+	if (u < 0.f || u > 1.f) return false;
 
-	// compute t (equation 3)
-	float t = (glm::dot(N, Origin) + d) / NdotRayDirection;
-	// check if the triangle is in behind the ray
-	if (t < 0) return false; // the triangle is behind 
+	//Prepare to test v parameter
+	Q = glm::cross(T, e1);
 
-	// compute the intersection point using equation 1
-	glm::vec3 P = Origin + t * Dir;
+	//Calculate V parameter and test bound
+	v = glm::dot(Dir, Q) * inv_det;
+	//The intersection lies outside of the triangle
+	if (v < 0.f || u + v  > 1.f) return false;
 
+	t = glm::dot(e2, Q) * inv_det;
 
+	if (t > EPSILON) { //ray intersection
+		return true;
+	}
 
-	// Step 2: inside-outside test
-	glm::vec3 C; // vector perpendicular to triangle's plane 
-
-	// edge 0
-	glm::vec3 edge0 = TB - TA;
-	glm::vec3 vp0 = P - TA;
-	C = glm::cross(edge0, vp0);
-	if (glm::dot(N, C) < 0) return false; // P is on the right side 
-
-	// edge 1
-	glm::vec3 edge1 = TC - TB;
-	glm::vec3 vp1 = P - TB;
-	C = glm::cross(edge1, vp1);
-	if (glm::dot(N, C) < 0)  return false; // P is on the right side 
-
-	// edge 2
-	glm::vec3 edge2 = TA - TC;
-	glm::vec3 vp2 = P - TC;
-	C = glm::cross(edge2, vp2);
-	if (glm::dot(N, C) < 0) return false; // P is on the right side; 
-
-	return true; // this ray hits the triangle 
+	// No hit, no win
+	return false;
 }
 
 bool Object::IsInside(glm::vec3 point) {
@@ -93,13 +84,16 @@ bool Object::IsInside(glm::vec3 point) {
 		if (VectorIntersectsTriangle(point, Direction, /* TRIANGLE: */ vertices[vert_index[0]], vertices[vert_index[1]], vertices[vert_index[2]]))
 			intersects++;
 	}
+	//std::cout << "Number of triangles hit: " << intersects << std::endl << std::flush;
 	
 	if (intersects % 2 == 0) {
 		// out
+		//std::cout << "Intesects == FALSE" << std::endl << std::flush;
 		return false;
 	}
 	else {
 		// in
+		//std::cout << "Intesects == TRUE" << std::endl << std::flush;
 		return true;
 	}
 }
@@ -135,7 +129,7 @@ void Object::CalculateBodyVolume() {
 	std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
 	std::cout << "BBox size z: " << fabs(BBCoords->max.z - BBCoords->min.z) << std::endl;
 
-	const int NumberIterations = 1000; 
+	const int NumberIterations = 100000; 
 	int hit = 0;
 
 	for (int i = 0; i < NumberIterations; i++) {
