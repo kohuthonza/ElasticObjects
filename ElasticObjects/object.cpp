@@ -107,7 +107,6 @@ void Object::CalculateBodyVolume() {
 	assert(verts.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
 	
 	std::cout << "Calculating body volume... ";
-
 	
 	/*
 	* Calculate body volume using Monte Carlo method 
@@ -123,7 +122,12 @@ void Object::CalculateBodyVolume() {
 	float BoundingBoxSizeZ = fabs(BBCoords->max.z - BBCoords->min.z);
 	
 	float BoundingBoxVolume =  BoundingBoxSizeX * BoundingBoxSizeY * BoundingBoxSizeZ;
-	
+
+	if (indices.size() > 500.0) {
+		BodyVolume = BoundingBoxVolume;
+		std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
+		return;
+	}
 	//std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
 
 	//std::cout << "BBox size x: " << fabs(BBCoords->max.x - BBCoords->min.x) << std::endl;
@@ -286,9 +290,9 @@ void Object::GenerateSprings(const float Force) {
 
 	for (unsigned int i = 0; i < verts.size(); ++i) {
 		for (unsigned int j = 0; j < verts.size(); ++j) {
-			if (!SpringExists(i, j)) {
+			//if (!SpringExists(i, j)) {
 				AddSpring(i, j, Force);
-			}
+			//}
 
 		}
 	}
@@ -297,25 +301,41 @@ void Object::GenerateSprings(const float Force) {
 }
 
 
-void Object::InitOBJTest(std::string FilePath, glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
+void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
 
 	OBJ_Loader obj(FilePath);
 	vertices = obj.getVertices();
 	indices = obj.getIndices();
 	normals = obj.getNormals();
 
-	//std::cout << "Normals size: " << normals.size() << std::endl;
-	//std::cout << "Indices size: " << indices.size() << std::endl;
-	//std::cout << "Vertices size: " << vertices.size() << std::endl;
+	std::cout << "Normals size: " << normals.size() << std::endl;
+	std::cout << "Indices size: " << indices.size() << std::endl;
+	std::cout << "Vertices size: " << vertices.size() << std::endl;
+
+	if (indices.size() != normals.size() * 3) { // fix normals
+		normals.resize(indices.size() / 3);
+
+		for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
+
+			glm::vec3 v[3];
+
+			v[0] = vertices[indices[i]];
+			v[1] = vertices[indices[i + 1]];
+			v[2] = vertices[indices[i + 2]];
+
+			normals[i / 3] = CalculateSurfaceNormal(v[0], v[1], v[2]);
+		}
+	}
 
 	for (auto &i : vertices) {
-		verts.push_back(new Vertex( i + offset, vec3(0.0, 0.0, 0.0) + initialVel, vec3(0.0, 0.0, 0.0), 1.1f ) );
+		verts.push_back(new Vertex( i + offset, vec3(0.0, 0.0, 0.0) + initialVel, vec3(0.0, 0.0, 0.0), Mass ) );
 	}
 	
 	GenerateBoundingBox();
 
-	const float SpringForce = 200.0;
+	const float SpringForce = 40.0;
 	GenerateSprings(SpringForce);
+
 
 	CalculateBodyVolume();
 	
@@ -513,7 +533,7 @@ void Object::Solve() {
 	if (isPlane)
 		return;
 
-	std::cout << "spring solve" << std::endl << std::flush;
+	//std::cout << "spring solve" << std::endl << std::flush;
 	for (unsigned int i = 0; i < springs.size(); ++i) {
 		springs[i]->Solve();
 	}
@@ -550,7 +570,7 @@ void Object::Simulate(float dt) {
 		//const float kb = 1.380648e-23; //- Bolzman konstant
 		//float R = Na * kb;
 		float R = 8.3144598; //- ideal gas constant (https://en.wikipedia.org/wiki/Gas_constant)
-		float Temperature = 295.0; //- Temperature in Kelvin
+		float Temperature = 1; //- Temperature in Kelvin
 					
 		glm::vec3 InsideForceSum(0.0, 0.0, 0.0);
 		
@@ -575,9 +595,10 @@ void Object::Simulate(float dt) {
 
 			// Accumulate force over all neigbouring faces
 			InsideForceSum += FaceArea * normals[i / 3] * (1 / BodyVolume) * R * Temperature;
+			//std::cout << "FaceArea = " << FaceArea << std::endl;
 		}
 		verts[i]->ApplyForce(InsideForceSum);
-		
+				
 	}
 
 
@@ -595,6 +616,7 @@ void Object::Simulate(float dt) {
 	* With new position update normal of each face
 	*/
 	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
+		
 		glm::vec3 v[3];
 
 		v[0] = vertices[indices[i]];

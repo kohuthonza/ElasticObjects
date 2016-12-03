@@ -31,7 +31,7 @@ public:
 
 	void InitTestHexa();
 
-	void InitOBJTest(std::string FilePath, glm::vec3 offset, glm::vec3 initialVel);
+	void InitOBJTest(std::string FilePath, const float Mass, glm::vec3 offset, glm::vec3 initialVel);
 
 	void Solve();
 
