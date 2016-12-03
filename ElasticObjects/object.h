@@ -51,7 +51,9 @@ public:
 
 	bool SpringExists(int point1, int point2);
 
-	void GenerateSprings();
+	void GenerateSprings(const float Force);
+
+	void GenerateSprings_NeighboursOnly(const float Force);
 
 	bool IsInside(glm::vec3 point);
 

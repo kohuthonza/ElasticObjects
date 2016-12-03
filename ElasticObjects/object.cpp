@@ -126,9 +126,9 @@ void Object::CalculateBodyVolume() {
 	
 	std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
 
-	std::cout << "BBox size x: " << fabs(BBCoords->max.x - BBCoords->min.x) << std::endl;
-	std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
-	std::cout << "BBox size z: " << fabs(BBCoords->max.z - BBCoords->min.z) << std::endl;
+	//std::cout << "BBox size x: " << fabs(BBCoords->max.x - BBCoords->min.x) << std::endl;
+	//std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
+	//td::cout << "BBox size z: " << fabs(BBCoords->max.z - BBCoords->min.z) << std::endl;
 
 	const int NumberIterations = 1000000; 
 	int hit = 0;
@@ -242,8 +242,8 @@ bool Object::SpringExists(int point1, int point2) {
 	return false;
 }
 
-void Object::GenerateSprings() {
-	
+void Object::GenerateSprings_NeighboursOnly(const float Force) {
+
 	assert(vertices.size() > 0 && "Spring generation can only be done with initialized buffers.");
 	assert(indices.size() > 0 && "Spring generation can only be done with initialized buffers.");
 	assert(verts.size() > 0 && "Spring generation can only be done with initialized buffers.");
@@ -274,6 +274,26 @@ void Object::GenerateSprings() {
 	std::cout << "Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
 }
 
+
+void Object::GenerateSprings(const float Force) {
+
+	assert(vertices.size() > 0 && "Spring generation can only be done with initialized buffers.");
+	assert(indices.size() > 0 && "Spring generation can only be done with initialized buffers.");
+	assert(verts.size() > 0 && "Spring generation can only be done with initialized buffers.");
+
+	for (unsigned int i = 0; i < verts.size(); ++i) {
+		for (unsigned int j = 0; j < verts.size(); ++j) {
+			if (!SpringExists(i, j)) {
+				AddSpring(i, j, Force);
+			}
+
+		}
+	}
+
+	std::cout << "Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
+}
+
+
 void Object::InitOBJTest(std::string FilePath, glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
 
 	OBJ_Loader obj(FilePath);
@@ -291,7 +311,8 @@ void Object::InitOBJTest(std::string FilePath, glm::vec3 offset = glm::vec3(0, 0
 	
 	GenerateBoundingBox();
 
-	GenerateSprings();
+	const float SpringForce = 100.0;
+	GenerateSprings(SpringForce);
 
 	CalculateBodyVolume();
 	
