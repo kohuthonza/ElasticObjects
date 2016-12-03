@@ -106,7 +106,7 @@ void Object::CalculateBodyVolume() {
 	assert(indices.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
 	assert(verts.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
 	
-	std::cout << "Calculating volume body, might take a while..." << std::endl;
+	std::cout << "Calculating body volume... ";
 
 	
 	/*
@@ -124,7 +124,7 @@ void Object::CalculateBodyVolume() {
 	
 	float BoundingBoxVolume =  BoundingBoxSizeX * BoundingBoxSizeY * BoundingBoxSizeZ;
 	
-	std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
+	//std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
 
 	//std::cout << "BBox size x: " << fabs(BBCoords->max.x - BBCoords->min.x) << std::endl;
 	//std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
@@ -150,7 +150,7 @@ void Object::CalculateBodyVolume() {
 	}
 	BodyVolume = BoundingBoxVolume * ((float)hit / (float)NumberIterations);
 
-	std::cout << "Body volume: " << BodyVolume << std::endl;
+	std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
 }
 
 
@@ -243,6 +243,7 @@ bool Object::SpringExists(int point1, int point2) {
 }
 
 void Object::GenerateSprings_NeighboursOnly(const float Force) {
+	std::cout << "Generating springs...";
 
 	assert(vertices.size() > 0 && "Spring generation can only be done with initialized buffers.");
 	assert(indices.size() > 0 && "Spring generation can only be done with initialized buffers.");
@@ -271,11 +272,13 @@ void Object::GenerateSprings_NeighboursOnly(const float Force) {
 		}
 	}
 
-	std::cout << "Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
+	std::cout << "  Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
 }
 
 
 void Object::GenerateSprings(const float Force) {
+
+	std::cout << "Generating springs..." ;
 
 	assert(vertices.size() > 0 && "Spring generation can only be done with initialized buffers.");
 	assert(indices.size() > 0 && "Spring generation can only be done with initialized buffers.");
@@ -290,7 +293,7 @@ void Object::GenerateSprings(const float Force) {
 		}
 	}
 
-	std::cout << "Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
+	std::cout << "  Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
 }
 
 
@@ -301,9 +304,9 @@ void Object::InitOBJTest(std::string FilePath, glm::vec3 offset = glm::vec3(0, 0
 	indices = obj.getIndices();
 	normals = obj.getNormals();
 
-	std::cout << "Normals size: " << normals.size() << std::endl;
-	std::cout << "Indices size: " << indices.size() << std::endl;
-	std::cout << "Vertices size: " << vertices.size() << std::endl;
+	//std::cout << "Normals size: " << normals.size() << std::endl;
+	//std::cout << "Indices size: " << indices.size() << std::endl;
+	//std::cout << "Vertices size: " << vertices.size() << std::endl;
 
 	for (auto &i : vertices) {
 		verts.push_back(new Vertex( i + offset, vec3(0.0, 0.0, 0.0) + initialVel, vec3(0.0, 0.0, 0.0), 1.1f ) );
@@ -311,7 +314,7 @@ void Object::InitOBJTest(std::string FilePath, glm::vec3 offset = glm::vec3(0, 0
 	
 	GenerateBoundingBox();
 
-	const float SpringForce = 100.0;
+	const float SpringForce = 200.0;
 	GenerateSprings(SpringForce);
 
 	CalculateBodyVolume();
