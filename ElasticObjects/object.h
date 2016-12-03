@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <string>
 
 #include "vertex.h"
 #include "spring.h"
@@ -30,7 +31,7 @@ public:
 
 	void InitTestHexa();
 
-	void InitOBJTest(glm::vec3 offset, glm::vec3 initialVel );
+	void InitOBJTest(std::string FilePath, glm::vec3 offset, glm::vec3 initialVel);
 
 	void Solve();
 
@@ -46,12 +47,26 @@ public:
 
 	AABB *GetAABB() { return &aabbCoords; }
 
+	void CalculateBodyVolume();
+
+	bool SpringExists(int point1, int point2);
+
+	void GenerateSprings();
+
+	bool IsInside(glm::vec3 point);
+
+	bool VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 Origin, glm::vec3 Dir, /* TRIANGLE: */ glm::vec3 TA, glm::vec3 TB, glm::vec3 TC);
+
+	glm::vec3 CalculateSurfaceNormal(glm::vec3 P1, glm::vec3 P2, glm::vec3 P3);
+
 private:
 	AABB aabbCoords;
 
 	bool isPlane = false;
 	vec3 normal;
 	vec3 pointOnPlane;
+
+	float BodyVolume;
 
 	const vec3 gravitation = vec3(0, -9.81f, 0);
 	const float airFrictionConstant = 0.2f;
