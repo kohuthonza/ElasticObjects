@@ -7,11 +7,11 @@ Sim::Sim() {
 	objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object());
-	objects.back()->InitOBJTest(glm::vec3(-2, 2, 0), glm::vec3(3, 0, 0));
+	objects.back()->InitOBJTest(glm::vec3(-2, 2, 0), glm::vec3(9, 0, 0.0f));
 	objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object());
-	objects.back()->InitOBJTest(glm::vec3(2, 2, 0), glm::vec3(-3, 0, 0.5));
+	objects.back()->InitOBJTest(glm::vec3(2, 2, 0), glm::vec3(-15.0f, 2.0f, 5.0f));
 	objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object(glm::vec3(0, -1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));
@@ -45,8 +45,9 @@ void Sim::Operate(float dt, int stop) {
 	init();
 	Solve();	
 	if (!stop) {
-		ResolveCollison();
+		
 		Simulate(dt);
+		ResolveCollison();
 		RecomputeBoundingBox();
 	}
 	Draw();

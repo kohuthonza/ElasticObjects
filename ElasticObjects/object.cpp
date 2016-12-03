@@ -340,8 +340,8 @@ void Object::GenerateBoundingBox(){
 	aabbCoords.min = tempMin;
 }
 
-static vec3 projectUonV(vec3 u, vec3 v) {
-	return ( v * (glm::dot(u, v)/glm::dot(v, v)) );
+inline vec3 projectUonV(vec3 u, vec3 v) {
+	return ( v * ( glm::dot(u, v) / glm::dot(v, v) ) );
 }
 
 void Object::ResolveVertices(Object * other) {
@@ -365,7 +365,7 @@ void Object::ResolveVertices(Object * other) {
 			if (abs(distance) < 0.5f) {				
 				vec3 rv = -generalObject->GetVerts()[i]->vel;
 				float velAlongNormal = glm::dot(rv, planeObject->normal);
-				float e = 0.1f;
+				float e = 0.5f;
 
 				float j = -(1.0f - e) * velAlongNormal;
 				j /= 1 / generalObject->GetVerts()[i]->mass;
@@ -382,7 +382,7 @@ void Object::ResolveVertices(Object * other) {
 				if (dist <= 0.5f) {
 					auto ObjectA = verts[i];
 					auto ObjectB = other->GetVerts()[j];
-
+					
 					vec3 nv1, nv2;
 
 					nv1 = ObjectA->vel;
@@ -395,8 +395,21 @@ void Object::ResolveVertices(Object * other) {
 
 					ObjectA->vel = nv1;
 					ObjectB->vel = nv2;
+					
+					/*
+					vec3 n = ObjectA->pos - ObjectB->pos;
+					vec3 nn = glm::normalize(n);
 
-					std::cout << "vertex " << i << " and " << j << " are in col" << std::endl;
+					float a1 = glm::dot(ObjectA->vel, nn);
+					float a2 = glm::dot(ObjectB->vel, nn);
+
+					float optimizedP = (float) (2.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
+					vec3 v1_ = ObjectA->vel - optimizedP * ObjectB->mass * nn;
+					vec3 v2_ = ObjectB->vel + optimizedP * ObjectA->mass * nn;
+
+					ObjectB->vel = v1_;
+					ObjectA->vel = v2_;
+					*/
 				}
 			}
 		}
