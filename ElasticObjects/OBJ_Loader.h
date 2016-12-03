@@ -3,12 +3,13 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <string>
 
 
 class OBJ_Loader
 {
 public:
-	OBJ_Loader(const char *filename);
+	OBJ_Loader(const std::string filename);
 	~OBJ_Loader();
 
 	std::vector<glm::vec3> getVertices();

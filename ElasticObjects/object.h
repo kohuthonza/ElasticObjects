@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 
 #include <vector>
+#include <string>
 
 #include "vertex.h"
 #include "spring.h"
@@ -30,7 +31,7 @@ public:
 
 	void InitTestHexa();
 
-	void InitOBJTest(glm::vec3 offset, glm::vec3 initialVel );
+	void InitOBJTest(std::string FilePath, glm::vec3 offset, glm::vec3 initialVel);
 
 	void Solve();
 

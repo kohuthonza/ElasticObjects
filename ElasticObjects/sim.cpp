@@ -7,11 +7,11 @@ Sim::Sim() {
 	objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object());
-	objects.back()->InitOBJTest(glm::vec3(-2, 2, 0), glm::vec3(3, 0, 0));
+	objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", glm::vec3(-2, 2, 0), glm::vec3(3, 0, 0));
 	objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object());
-	objects.back()->InitOBJTest(glm::vec3(2, 2, 0), glm::vec3(-3, 0, 0.5));
+	objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", glm::vec3(2, 2, 0), glm::vec3(-3, 0, 0.5));
 	objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object(glm::vec3(0, -1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));

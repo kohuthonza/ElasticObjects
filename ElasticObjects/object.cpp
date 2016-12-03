@@ -3,6 +3,7 @@
 #include <iostream>
 #include <random>
 #include <chrono>
+#include <string>
 
 float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 	glm::vec3 VectorAB = A - B;
@@ -129,7 +130,7 @@ void Object::CalculateBodyVolume() {
 	std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
 	std::cout << "BBox size z: " << fabs(BBCoords->max.z - BBCoords->min.z) << std::endl;
 
-	const int NumberIterations = 100000; 
+	const int NumberIterations = 1000000; 
 	int hit = 0;
 
 	for (int i = 0; i < NumberIterations; i++) {
@@ -273,9 +274,9 @@ void Object::GenerateSprings() {
 	std::cout << "Springs generated. Number of springs is " << springs.size() << ". " << std::endl;
 }
 
-void Object::InitOBJTest(glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
+void Object::InitOBJTest(std::string FilePath, glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
 
-	OBJ_Loader obj("obj_models\\simple_sphere.obj");
+	OBJ_Loader obj(FilePath);
 	vertices = obj.getVertices();
 	indices = obj.getIndices();
 	normals = obj.getNormals();
@@ -488,6 +489,7 @@ void Object::Solve() {
 	if (isPlane)
 		return;
 
+	std::cout << "spring solve" << std::endl << std::flush;
 	for (unsigned int i = 0; i < springs.size(); ++i) {
 		springs[i]->Solve();
 	}
@@ -513,6 +515,7 @@ void Object::Simulate(float dt) {
 		/*
 		* Spring forces
 		*/
+		// computed in the Solve() method
 
 
 		/*
