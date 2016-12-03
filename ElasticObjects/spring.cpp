@@ -2,7 +2,10 @@
 
 using glm::vec3;
 
-Spring::Spring(Vertex * $point1, Vertex * $point2, float springLen, float springConst) {
+Spring::Spring(unsigned int _index1, unsigned int _index2, Vertex * $point1, Vertex * $point2, float springLen, float springConst) {
+	index1 = _index1;
+	index2 = _index2;
+
 	point1 = $point1;
 	point2 = $point2;
 

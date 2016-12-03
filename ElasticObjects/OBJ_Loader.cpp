@@ -4,12 +4,12 @@
 #include <sstream>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
+#include <string>
 
 #include "OBJ_Loader.h"
 
 using namespace std;
 /*
-
 Brief .OBJ format description:
 
 file example:
@@ -43,7 +43,7 @@ f is a face:
 
 */
 
-OBJ_Loader::OBJ_Loader(const char *filename)
+OBJ_Loader::OBJ_Loader(const string filename)
 {
 	ifstream inputFile(filename, ios::in);
 	if (inputFile.fail()) {
