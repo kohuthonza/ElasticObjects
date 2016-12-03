@@ -497,42 +497,60 @@ void Object::Simulate(float dt) {
 	if (isPlane)
 		return;
 
-	/*
-	* Calculate and accumulate gravity and spring forces
-	*	for all particles.
-	*/
 	for (unsigned int i = 0; i < verts.size(); ++i) {
+		/* For more info follow http://academypublisher.com/jcp/vol02/no08/jcp02083443.pdf */
+
+		/*
+		* Gravitational force
+		*/
 		verts[i]->ApplyForce(gravitation * verts[i]->mass);
+
+		/*
+		* Damping force
+		*/
 		verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
-	}
 
-	/*
-	*  Simulate ideal gas pressure from the inside of the object
-	*/
-	for (unsigned int i = 0; i < indices.size(); i+=3) { // loop over all faces
-		glm::vec3 v[3];
-		
-		v[0] = vertices[indices[ i ]];
-		v[1] = vertices[indices[ i + 1 ]];
-		v[2] = vertices[indices[ i + 2 ]];
+		/*
+		* Spring forces
+		*/
 
+
+		/*
+		*  Inside pressure (Simulate ideal gas pressure from the inside of the object)
+		*/
 		//Calculate the pressure value
-		const float Na = 6.02214e23; //- Avogardo number
-		const float kb = 1.380648e-23; //- Bolzman konstant
+		//const float Na = 6.02214e23; //- Avogardo number
+		//const float kb = 1.380648e-23; //- Bolzman konstant
+		//float R = Na * kb;
+		float R = 8.3144598; //- ideal gas constant (https://en.wikipedia.org/wiki/Gas_constant)
 		float Temperature = 295.0; //- Temperature in Kelvin
+					
+		glm::vec3 InsideForceSum(0.0, 0.0, 0.0);
 		
-		float R = Na * kb;
+		for (unsigned int i = 0; i < indices.size(); i+=3) { // loop over all faces
+			glm::vec3 v[3];
+		
+			v[0] = vertices[indices[ i ]];
+			v[1] = vertices[indices[ i + 1 ]];
+			v[2] = vertices[indices[ i + 2 ]];
 
-		//float Force = n R T Ve-1
-		glm::vec3 GasPressureForce = normals[i / 3] * R * Temperature / BodyVolume;
+			/*
+			* Check if face contains current vertice, continue if not
+			*/
+			bool contains = false;
+			contains |= (indices[i] == i);
+			contains |= (indices[i + 1] == i);
+			contains |= (indices[i + 2] == i);
+			if (!contains) continue;
 
-		//Loop over particles which define the face
+			
+			float FaceArea = TriangleArea(v[0], v[1], v[2]);
 
-		//Multiply result by field of the face and ˆn
-		float Area = TriangleArea(v[0], v[1], v[2]);
-
-		//Accumulate finally pressure force to the particle.
-
+			// Accumulate force over all neigbouring faces
+			InsideForceSum += FaceArea * normals[i / 3] * (1 / BodyVolume) * R * Temperature;
+		}
+		verts[i]->ApplyForce(InsideForceSum);
+		
 	}
 
 
@@ -546,8 +564,36 @@ void Object::Simulate(float dt) {
 		verts[i]->force = vec3(0, 0, 0);
 	}
 
+	/*
+	* With new position update normal of each face
+	*/
+	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
+		glm::vec3 v[3];
+
+		v[0] = vertices[indices[i]];
+		v[1] = vertices[indices[i + 1]];
+		v[2] = vertices[indices[i + 2]];
+
+		normals[i/3] = CalculateSurfaceNormal(v[0], v[1], v[2]);
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(vertices[0]), &vertices[0]);
+}
+
+glm::vec3 Object::CalculateSurfaceNormal(glm::vec3 P1, glm::vec3 P2, glm::vec3 P3) {
+	/* Pseudo-code source: https://www.opengl.org/wiki/Calculating_a_Surface_Normal */
+	
+	glm::vec3 U = P2 - P1;
+	glm::vec3 V = P3 - P1;
+
+	glm::vec3 Normal;
+
+	Normal.x = (U.y * V.z) - (U.z * V.y);
+	Normal.y = (U.z * V.x) - (U.x * V.z);
+	Normal.z = (U.x * V.y) - (U.y * V.x);
+
+	return Normal;
 }
 
 void Object::Draw() {

@@ -56,6 +56,8 @@ public:
 
 	bool VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 Origin, glm::vec3 Dir, /* TRIANGLE: */ glm::vec3 TA, glm::vec3 TB, glm::vec3 TC);
 
+	glm::vec3 CalculateSurfaceNormal(glm::vec3 P1, glm::vec3 P2, glm::vec3 P3);
+
 private:
 	AABB aabbCoords;
 
