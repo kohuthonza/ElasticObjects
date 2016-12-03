@@ -51,6 +51,9 @@
     <ClCompile Include="vertex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="OBJ_Loader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="shader.h">
@@ -86,9 +89,20 @@
     <ClInclude Include="sim.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="OBJ_Loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="basic.fs" />
     <None Include="basic.vs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="obj_models\simple_cube.obj" />
+    <Object Include="obj_models\simple_sphere.obj" />
+    <Object Include="obj_models\bunny.obj" />
+    <Object Include="obj_models\bunny_reduced.obj" />
+    <Object Include="obj_models\bunny_reduced_600faces.obj" />
+    <Object Include="obj_models\sphere2.obj" />
   </ItemGroup>
 </Project>

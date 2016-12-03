@@ -31,7 +31,7 @@ public:
 
 	void InitTestHexa();
 
-	void InitOBJTest(std::string FilePath, glm::vec3 offset, glm::vec3 initialVel);
+	void InitOBJTest(std::string FilePath, const float Mass, glm::vec3 offset, glm::vec3 initialVel);
 
 	void Solve();
 
@@ -51,7 +51,9 @@ public:
 
 	bool SpringExists(int point1, int point2);
 
-	void GenerateSprings();
+	void GenerateSprings(const float Force);
+
+	void GenerateSprings_NeighboursOnly(const float Force);
 
 	bool IsInside(glm::vec3 point);
 
