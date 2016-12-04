@@ -349,7 +349,13 @@ void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset
 	OBJ_Loader obj(FilePath);
 	vertices = obj.getVertices();
 	indices = obj.getIndices();
+	normalsIndices = obj.getNormalsIndices();
 	normals = obj.getNormals();
+
+	for (int i = 0; i < normalsIndices.size(); i++) {
+		verticesToDraw.push_back(vertices[indices[i]]);
+		normalsToDraw.push_back(normals[normalsIndices[i] - 1]);
+	}
 
 	std::cout << "Normals size: " << normals.size() << std::endl;
 	std::cout << "Indices size: " << indices.size() << std::endl;
@@ -382,7 +388,7 @@ void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset
 
 	CalculateBodyVolume_AABB();
 	
- 	for (unsigned int i = 0; i < obj.getVerticesNumber(); i++) {
+ 	for (unsigned int i = 0; i < normalsIndices.size(); i++) {
 		colors.push_back(red);
 	}
 	
@@ -392,7 +398,7 @@ void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset
 	//positions
 	glGenBuffers(NUM_BUFFERS, vertexArrayBuffers);
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_DYNAMIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, verticesToDraw.size() * sizeof(verticesToDraw[0]), &verticesToDraw[0], GL_DYNAMIC_DRAW);
 
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
@@ -404,9 +410,12 @@ void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	//indices
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexArrayBuffers[INDICES_VB]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
+	//normals
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[NORMAL_VB]);
+	glBufferData(GL_ARRAY_BUFFER, normalsToDraw.size() * sizeof(normalsToDraw[0]), &normalsToDraw[0], GL_DYNAMIC_DRAW);
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	glBindVertexArray(0);
 }
@@ -640,8 +649,19 @@ void Object::Simulate(float dt) {
 
 	//UpdateNormals();
 
+	verticesToDraw.clear();
+	normalsToDraw.clear();
+
+	for (int i = 0; i < normalsIndices.size(); i++) {
+		verticesToDraw.push_back(vertices[indices[i]]);
+		normalsToDraw.push_back(normals[normalsIndices[i] - 1]);
+	}
+
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(vertices[0]), &vertices[0]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, verticesToDraw.size() * sizeof(verticesToDraw[0]), &verticesToDraw[0]);
+
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[NORMAL_VB]);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, normalsToDraw.size() * sizeof(normalsToDraw[0]), &normalsToDraw[0]);
 }
 
 glm::vec3 Object::CalculateSurfaceNormal(glm::vec3 P1, glm::vec3 P2, glm::vec3 P3) {
@@ -678,11 +698,19 @@ void Object::Draw(GLuint program) {
 	glUniform3fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
 	GLuint lightPositionUniformLocation = glGetUniformLocation(program, "lightPosition");
-	vec3 lightPosition(2.0f, 0.5f, 0.0f);
+	vec3 lightPosition(10.0f, 1.0f, 0.0f);
 	glUniform3fv(lightPositionUniformLocation, 1, &lightPosition[0]);
 
 	glBindVertexArray(vertexArrayObject);
-	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
+
+	if (isElements) {
+		glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
+	}
+	else {
+		glDrawArrays(GL_TRIANGLES, 0, verticesToDraw.size());
+	}
+	glBindVertexArray(0);
+
 	glBindVertexArray(0);
 }
 

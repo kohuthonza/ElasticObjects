@@ -87,9 +87,12 @@ private:
 	std::vector<Spring *> springs;
 
 	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> verticesToDraw;
 	std::vector<GLushort> indices;
+	std::vector<GLushort> normalsIndices;
 	std::vector<glm::vec3> colors;
 	std::vector<glm::vec3> normals;
+	std::vector<glm::vec3> normalsToDraw;
 
 	glm::vec3 red = glm::vec3(1.0f, 0.0f, 0.0f);
 	glm::vec3 green = glm::vec3(0.0f, 1.0f, 0.0f);
