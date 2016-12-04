@@ -104,5 +104,6 @@
     <Object Include="obj_models\bunny_reduced.obj" />
     <Object Include="obj_models\bunny_reduced_600faces.obj" />
     <Object Include="obj_models\sphere2.obj" />
+    <Object Include="obj_models\plane.obj" />
   </ItemGroup>
 </Project>

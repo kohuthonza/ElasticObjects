@@ -99,6 +99,16 @@ bool Object::IsInside(glm::vec3 point) {
 	}
 }
 
+void Object::CheckIfSolid() {
+	if (BodyVolume > 0.2) {
+		solid = true;
+	}
+	else {
+		solid = false;
+	}
+}
+
+
 void Object::CalculateBodyVolume() {
 	
 	assert(springs.size() > 0 && "Volume calculation can be done only alfter an object is fully initialized.");
@@ -126,6 +136,7 @@ void Object::CalculateBodyVolume() {
 	if (indices.size() > 500.0) {
 		BodyVolume = BoundingBoxVolume;
 		std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
+		CheckIfSolid();
 		return;
 	}
 	//std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
@@ -153,7 +164,7 @@ void Object::CalculateBodyVolume() {
 		}
 	}
 	BodyVolume = BoundingBoxVolume * ((float)hit / (float)NumberIterations);
-
+	CheckIfSolid();
 	std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
 }
 
@@ -565,40 +576,41 @@ void Object::Simulate(float dt) {
 		/*
 		*  Inside pressure (Simulate ideal gas pressure from the inside of the object)
 		*/
-		//Calculate the pressure value
-		//const float Na = 6.02214e23; //- Avogardo number
-		//const float kb = 1.380648e-23; //- Bolzman konstant
-		//float R = Na * kb;
-		float R = 8.3144598; //- ideal gas constant (https://en.wikipedia.org/wiki/Gas_constant)
-		float Temperature = 1; //- Temperature in Kelvin
-					
-		glm::vec3 InsideForceSum(0.0, 0.0, 0.0);
-		
-		for (unsigned int i = 0; i < indices.size(); i+=3) { // loop over all faces
-			glm::vec3 v[3];
-		
-			v[0] = vertices[indices[ i ]];
-			v[1] = vertices[indices[ i + 1 ]];
-			v[2] = vertices[indices[ i + 2 ]];
+		if (solid) {
+			//Calculate the pressure value
+			//const float Na = 6.02214e23; //- Avogardo number
+			//const float kb = 1.380648e-23; //- Bolzman konstant
+			//float R = Na * kb;
+			float R = 8.3144598; //- ideal gas constant (https://en.wikipedia.org/wiki/Gas_constant)
+			float Temperature = 1; //- Temperature in Kelvin
 
-			/*
-			* Check if face contains current vertice, continue if not
-			*/
-			bool contains = false;
-			contains |= (indices[i] == i);
-			contains |= (indices[i + 1] == i);
-			contains |= (indices[i + 2] == i);
-			if (!contains) continue;
+			glm::vec3 InsideForceSum(0.0, 0.0, 0.0);
 
-			
-			float FaceArea = TriangleArea(v[0], v[1], v[2]);
+			for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
+				glm::vec3 v[3];
 
-			// Accumulate force over all neigbouring faces
-			InsideForceSum += FaceArea * normals[i / 3] * (1 / BodyVolume) * R * Temperature;
-			//std::cout << "FaceArea = " << FaceArea << std::endl;
-		}
-		verts[i]->ApplyForce(InsideForceSum);
-				
+				v[0] = vertices[indices[i]];
+				v[1] = vertices[indices[i + 1]];
+				v[2] = vertices[indices[i + 2]];
+
+				/*
+				* Check if face contains current vertice, continue if not
+				*/
+				bool contains = false;
+				contains |= (indices[i] == i);
+				contains |= (indices[i + 1] == i);
+				contains |= (indices[i + 2] == i);
+				if (!contains) continue;
+
+
+				float FaceArea = TriangleArea(v[0], v[1], v[2]);
+
+				// Accumulate force over all neigbouring faces
+				InsideForceSum += FaceArea * normals[i / 3] * (1 / BodyVolume) * R * Temperature;
+				//std::cout << "FaceArea = " << FaceArea << std::endl;
+			}
+			verts[i]->ApplyForce(InsideForceSum);
+		}		
 	}
 
 

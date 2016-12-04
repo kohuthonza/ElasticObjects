@@ -61,6 +61,8 @@ public:
 
 	glm::vec3 CalculateSurfaceNormal(glm::vec3 P1, glm::vec3 P2, glm::vec3 P3);
 
+	void Object::CheckIfSolid();
+
 private:
 	AABB aabbCoords;
 
@@ -69,6 +71,8 @@ private:
 	vec3 pointOnPlane;
 
 	float BodyVolume;
+
+	bool solid;
 
 	const vec3 gravitation = vec3(0, -9.81f, 0);
 	const float airFrictionConstant = 0.2f;
