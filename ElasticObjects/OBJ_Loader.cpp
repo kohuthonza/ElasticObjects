@@ -88,6 +88,10 @@ OBJ_Loader::OBJ_Loader(const string filename)
 			indices.push_back( (GLushort) (vertex[0]) );
 			indices.push_back( (GLushort) (vertex[1]) );
 			indices.push_back( (GLushort) (vertex[2]) );
+
+			normalsIndices.push_back((GLushort)(normal[0]));
+			normalsIndices.push_back((GLushort)(normal[1]));
+			normalsIndices.push_back((GLushort)(normal[2]));
 		}
 		else if (l[0] == '#')
 		{
@@ -284,6 +288,10 @@ std::vector<glm::vec3> OBJ_Loader::getVertices() {
 
 std::vector<GLushort> OBJ_Loader::getIndices() {
 	return indices;
+}
+
+std::vector<GLushort> OBJ_Loader::getNormalsIndices() {
+	return normalsIndices;
 }
 
 std::vector<glm::vec3> OBJ_Loader::getNormals() {

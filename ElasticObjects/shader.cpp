@@ -30,6 +30,10 @@ void Shader::Bind(){
 	glUseProgram(program);
 }
 
+GLuint Shader::GetProgram() {
+	return program;
+}
+
 void Shader::Update(const Transform & transform, const Camera &camera){
 	glm::mat4 model = camera.GetViewProjection() * transform.GetModel();
 
