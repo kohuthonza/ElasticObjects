@@ -36,12 +36,12 @@ void Sim::Simulate(float dt) {
 		objects[a]->Simulate(dt);
 }
 
-void Sim::Draw() {
+void Sim::Draw(GLuint program) {
 	for (unsigned int a = 0; a < objects.size(); ++a)
-		objects[a]->Draw();
+		objects[a]->Draw(program);
 }
 
-void Sim::Operate(float dt) {
+void Sim::Operate(float dt, GLuint program) {
 	init();
 	Solve();	
 	if (!stop) {		
@@ -49,7 +49,7 @@ void Sim::Operate(float dt) {
 		ResolveCollison();
 		RecomputeBoundingBox();
 	}
-	Draw();
+	Draw(program);
 }
 
 void Sim::ResolveCollison(){

@@ -679,7 +679,7 @@ void Object::UpdateNormals() {
 		normals[i / 3] = CalculateSurfaceNormal(v[0], v[1], v[2]);
 	}
 }
-void Object::Draw() {
+void Object::Draw(GLuint program) {
 	glBindVertexArray(vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
 	glBindVertexArray(0);

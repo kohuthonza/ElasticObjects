@@ -16,9 +16,9 @@ public:
 
 	void Simulate(float dt);
 
-	void Draw();
+	void Draw(GLuint program);
 
-	void Operate(float dt);
+	void Operate(float dt, GLuint program);
 
 	void ResolveCollison();
 

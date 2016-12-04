@@ -37,7 +37,7 @@ public:
 
 	void Simulate(float dt);
 
-	void Draw();
+	void Draw(GLuint program);
 
 	void GenerateBoundingBox();
 
