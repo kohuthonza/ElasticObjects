@@ -182,7 +182,7 @@ void Object::CalculateBodyVolume_AABB() {
 
 	float BoundingBoxVolume = BoundingBoxSizeX * BoundingBoxSizeY * BoundingBoxSizeZ;
 	BodyVolume = BoundingBoxVolume;
-
+	CheckIfSolid();
 	std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
 
 }
@@ -646,16 +646,7 @@ void Object::Simulate(float dt) {
 	/*
 	* With new position update normal of each face
 	*/
-	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
-		
-		glm::vec3 v[3];
-
-		v[0] = vertices[indices[i]];
-		v[1] = vertices[indices[i + 1]];
-		v[2] = vertices[indices[i + 2]];
-
-		normals[i/3] = CalculateSurfaceNormal(v[0], v[1], v[2]);
-	}
+	UpdateNormals();
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(vertices[0]), &vertices[0]);
@@ -676,6 +667,18 @@ glm::vec3 Object::CalculateSurfaceNormal(glm::vec3 P1, glm::vec3 P2, glm::vec3 P
 	return Normal;
 }
 
+void Object::UpdateNormals() {
+	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
+
+		glm::vec3 v[3];
+
+		v[0] = vertices[indices[i]];
+		v[1] = vertices[indices[i + 1]];
+		v[2] = vertices[indices[i + 2]];
+
+		normals[i / 3] = CalculateSurfaceNormal(v[0], v[1], v[2]);
+	}
+}
 void Object::Draw() {
 	glBindVertexArray(vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);

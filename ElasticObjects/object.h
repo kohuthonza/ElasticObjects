@@ -65,6 +65,8 @@ public:
 
 	void Object::CheckIfSolid();
 
+	void Object::UpdateNormals();
+
 private:
 	AABB aabbCoords;
 
