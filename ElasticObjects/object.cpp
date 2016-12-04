@@ -574,28 +574,11 @@ void Object::Simulate(float dt) {
 		return;
 
 	for (unsigned int i = 0; i < verts.size(); ++i) {
-		/* For more info follow http://academypublisher.com/jcp/vol02/no08/jcp02083443.pdf */
-
-		/*
-		* Gravitational force
-		*/
 		verts[i]->ApplyForce(gravitation * verts[i]->mass);
 
-		/*
-		* Damping force
-		*/
 		verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
 
-		/*
-		* Spring forces
-		*/
-		// computed in the Solve() method
-
-
-		/*
-		*  Inside pressure (Simulate ideal gas pressure from the inside of the object)
-		*/
-		if (solid) {
+		/*if (solid) {
 			//Calculate the pressure value
 			//const float Na = 6.02214e23; //- Avogardo number
 			//const float kb = 1.380648e-23; //- Bolzman konstant
@@ -612,9 +595,6 @@ void Object::Simulate(float dt) {
 				v[1] = vertices[indices[i + 1]];
 				v[2] = vertices[indices[i + 2]];
 
-				/*
-				* Check if face contains current vertice, continue if not
-				*/
 				bool contains = false;
 				contains |= (indices[i] == i);
 				contains |= (indices[i + 1] == i);
@@ -630,7 +610,9 @@ void Object::Simulate(float dt) {
 			}
 			verts[i]->ApplyForce(InsideForceSum);
 		}		
+		*/
 	}
+	
 
 
 	for (unsigned int i = 0; i < verts.size(); ++i) {
@@ -643,10 +625,7 @@ void Object::Simulate(float dt) {
 		verts[i]->force = vec3(0, 0, 0);
 	}
 
-	/*
-	* With new position update normal of each face
-	*/
-	UpdateNormals();
+	//UpdateNormals();
 
 	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(vertices[0]), &vertices[0]);
@@ -746,7 +725,7 @@ void Object::ResolveVertices(Object * other) {
 					auto ObjectA = verts[i];
 					auto ObjectB = other->GetVerts()[j];
 					
-					vec3 nv1, nv2;
+					/*vec3 nv1, nv2;
 
 					nv1 = ObjectA->vel;
 					nv1 += projectUonV(ObjectB->vel, ObjectB->pos - ObjectA->pos);
@@ -756,23 +735,23 @@ void Object::ResolveVertices(Object * other) {
 					nv2 += projectUonV(ObjectA->vel, ObjectB->pos - ObjectA->pos);
 					nv2 -= projectUonV(ObjectB->vel, ObjectA->pos - ObjectB->pos);
 
-					ObjectA->vel = nv1;
-					ObjectB->vel = nv2;
+					ObjectA->vel = nv1;;
+					ObjectB->vel = nv2;;
+					*/
 					
-					/*
 					vec3 n = ObjectA->pos - ObjectB->pos;
 					vec3 nn = glm::normalize(n);
 
 					float a1 = glm::dot(ObjectA->vel, nn);
 					float a2 = glm::dot(ObjectB->vel, nn);
 
-					float optimizedP = (float) (2.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
+					float optimizedP = (float) (1.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
 					vec3 v1_ = ObjectA->vel - optimizedP * ObjectB->mass * nn;
 					vec3 v2_ = ObjectB->vel + optimizedP * ObjectA->mass * nn;
 
 					ObjectB->vel = v1_;
 					ObjectA->vel = v2_;
-					*/
+					
 				}
 			}
 		}
