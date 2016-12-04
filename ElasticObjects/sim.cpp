@@ -6,17 +6,17 @@ Sim::Sim() {
 	//objects.push_back(new Object(glm::vec3(1, 0, 0), glm::vec3(3, -2.5, -1), glm::vec3(3, -4.5, -1), 5.f));
 	//objects.back()->GenerateBoundingBox();
 
-	objects.push_back(new Object());
-	objects.back()->InitOBJTest("obj_models\\bunny_reduced_600faces.obj", 10.0, glm::vec3(-2, 2, 0), glm::vec3(0, 10, 0));
-	objects.back()->GenerateBoundingBox();
-
 	//objects.push_back(new Object());
-	//objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", glm::vec3(2, 2, 0), glm::vec3(-3, 0, 0.5));
+	//objects.back()->InitOBJTest("obj_models\\plane.obj", 10.0, glm::vec3(-2, 2, 0), glm::vec3(0, 10, 0));
 	//objects.back()->GenerateBoundingBox();
 
-
-	objects.push_back(new Object(glm::vec3(0, -1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));
+	objects.push_back(new Object());
+	objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", 20.0f,  glm::vec3(2, 2, 0), glm::vec3(-3, 0, 0.5));
 	objects.back()->GenerateBoundingBox();
+
+
+	//objects.push_back(new Object(glm::vec3(0, -1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));
+	//objects.back()->GenerateBoundingBox();
 
 	//objects.push_back(new Object(glm::vec3(0, 0, 1), glm::vec3(0, 2.5, -2), glm::vec3(3, 2.5, -2), 5.f));
 	//objects.back()->GenerateBoundingBox();
@@ -42,11 +42,10 @@ void Sim::Draw() {
 		objects[a]->Draw();
 }
 
-void Sim::Operate(float dt, int stop) {
+void Sim::Operate(float dt) {
 	init();
 	Solve();	
-	if (!stop) {
-		
+	if (!stop) {		
 		Simulate(dt);
 		ResolveCollison();
 		RecomputeBoundingBox();

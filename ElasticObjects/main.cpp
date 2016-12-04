@@ -55,17 +55,15 @@ void SimTest(int milliseconds) {
 
 	Sim ms;
 
-	int stopSimFlag = 0;
-
 	while (!display.IsClosed()) {
 		display.Clear(0.01f, 0.16f, 0.15f, 1.0f);
 
 		shader.Bind();
 		shader.Update(transform, camera);
 
-		ms.Operate(dt, stopSimFlag);
+		ms.Operate(dt);
 
-		display.Update(camera, &stopSimFlag);
+		display.Update(camera, ms);
 
 		frameCounter++;
 		//UpdateFPS(frameCounter);

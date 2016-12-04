@@ -18,14 +18,18 @@ public:
 
 	void Draw();
 
-	void Operate(float dt, int stop);
+	void Operate(float dt);
 
 	void ResolveCollison();
 
 	void RecomputeBoundingBox();
 
+	void ToggleStop() { stop = !stop; }
+
 private:
 	std::vector<Object *> objects;
 
 	bool IsInCollision(AABB *cube1, AABB *cube2);
+
+	bool stop = false;
 };
