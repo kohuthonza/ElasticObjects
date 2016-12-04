@@ -26,6 +26,8 @@ public:
 
 	void ToggleStop() { stop = !stop; }
 
+	std::vector<Object *> &GetObjects() { return objects; }
+
 private:
 	std::vector<Object *> objects;
 

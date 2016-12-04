@@ -59,10 +59,16 @@ void Display::Update(Camera &camera, Sim &sim){
 					case SDLK_DOWN:
 						camera.GetPos() = camera.GetPos() - camera.GetFwd() * 0.05f;
 						break;
-					case SDLK_SPACE:
-						std::cout << "space hit" << std::endl;
+					case SDLK_p:						
 						sim.ToggleStop();
 						break;
+					case SDLK_SPACE: {
+						glm::vec3 spherepos = camera.GetPos() + camera.GetFwd()*2.0f;
+						sim.GetObjects().push_back(new Object());
+						sim.GetObjects().back()->InitOBJTest("obj_models\\simple_sphere.obj", 20.0f, spherepos, camera.GetFwd() * 50.0f);
+						sim.GetObjects().back()->GenerateBoundingBox();
+						break;
+					}
 					default:
 						break;
 				}
