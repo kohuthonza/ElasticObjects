@@ -61,7 +61,7 @@ void SimTest(int milliseconds) {
 		shader.Bind();
 		shader.Update(transform, camera);
 
-		ms.Operate(dt);
+		ms.Operate(dt, shader.GetProgram());
 
 		display.Update(camera, ms);
 

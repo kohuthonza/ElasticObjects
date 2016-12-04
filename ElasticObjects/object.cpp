@@ -191,6 +191,7 @@ void Object::CalculateBodyVolume_AABB() {
 
 Object::Object(glm::vec3 $normal, glm::vec3 point1, glm::vec3 point2, float D){
 	isPlane = true;
+	isElements = true;
 	normal = $normal;
 	pointOnPlane = point1;
 
@@ -227,6 +228,11 @@ Object::Object(glm::vec3 $normal, glm::vec3 point1, glm::vec3 point2, float D){
 	colors.push_back(color);
 	colors.push_back(color);
 
+	normals.push_back(normal);
+	normals.push_back(normal);
+	normals.push_back(normal);
+	normals.push_back(normal);
+
 	glGenVertexArrays(1, &vertexArrayObject);
 	glBindVertexArray(vertexArrayObject);
 
@@ -244,6 +250,13 @@ Object::Object(glm::vec3 $normal, glm::vec3 point1, glm::vec3 point2, float D){
 
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
+	//normals
+	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[NORMAL_VB]);
+	glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(normals[0]), &normals[0], GL_STATIC_DRAW);
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
 	//indices
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexArrayBuffers[INDICES_VB]);
@@ -658,7 +671,16 @@ void Object::UpdateNormals() {
 		normals[i / 3] = CalculateSurfaceNormal(v[0], v[1], v[2]);
 	}
 }
-void Object::Draw() {
+void Object::Draw(GLuint program) {
+
+	GLuint ambientLightUniformLocation = glGetUniformLocation(program, "ambientLight");
+	vec3 ambientLight(0.2f, 0.2f, 0.2f);
+	glUniform3fv(ambientLightUniformLocation, 1, &ambientLight[0]);
+
+	GLuint lightPositionUniformLocation = glGetUniformLocation(program, "lightPosition");
+	vec3 lightPosition(2.0f, 0.5f, 0.0f);
+	glUniform3fv(lightPositionUniformLocation, 1, &lightPosition[0]);
+
 	glBindVertexArray(vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
 	glBindVertexArray(0);
