@@ -680,6 +680,15 @@ void Object::UpdateNormals() {
 	}
 }
 void Object::Draw(GLuint program) {
+
+	GLuint ambientLightUniformLocation = glGetUniformLocation(program, "ambientLight");
+	vec3 ambientLight(1.0f, 1.0f, 1.0f);
+	glUniform3fv(ambientLightUniformLocation, 1, &ambientLight[0]);
+
+	GLuint lightPositionUniformLocation = glGetUniformLocation(program, "lightPosition");
+	vec3 lightPosition(10.0f, 1.0f, 0.0f);
+	glUniform3fv(lightPositionUniformLocation, 1, &lightPosition[0]);
+
 	glBindVertexArray(vertexArrayObject);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_SHORT, 0);
 	glBindVertexArray(0);
