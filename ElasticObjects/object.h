@@ -47,7 +47,9 @@ public:
 
 	AABB *GetAABB() { return &aabbCoords; }
 
-	void CalculateBodyVolume();
+	void CalculateBodyVolume_MC();
+
+	void CalculateBodyVolume_AABB();
 
 	bool SpringExists(int point1, int point2);
 
