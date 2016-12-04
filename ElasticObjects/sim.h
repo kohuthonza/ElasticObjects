@@ -16,9 +16,9 @@ public:
 
 	void Simulate(float dt);
 
-	void Draw(GLuint program);
+	void Draw(GLuint program, glm::vec3 lightPosition);
 
-	void Operate(float dt, GLuint program);
+	void Operate(float dt, GLuint program, glm::vec3 lightPosition);
 
 	void ResolveCollison();
 

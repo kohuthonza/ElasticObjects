@@ -37,7 +37,7 @@ public:
 
 	void Simulate(float dt);
 
-	void Draw(GLuint program);
+	void Draw(GLuint program, glm::vec3 lightPosition);
 
 	void GenerateBoundingBox();
 

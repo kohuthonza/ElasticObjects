@@ -36,12 +36,12 @@ void Sim::Simulate(float dt) {
 		objects[a]->Simulate(dt);
 }
 
-void Sim::Draw(GLuint program) {
+void Sim::Draw(GLuint program, glm::vec3 lightPosition) {
 	for (unsigned int a = 0; a < objects.size(); ++a)
-		objects[a]->Draw(program);
+		objects[a]->Draw(program, lightPosition);
 }
 
-void Sim::Operate(float dt, GLuint program) {
+void Sim::Operate(float dt, GLuint program, glm::vec3 lightPosition) {
 	init();
 	Solve();	
 	if (!stop) {		
@@ -49,7 +49,7 @@ void Sim::Operate(float dt, GLuint program) {
 		ResolveCollison();
 		RecomputeBoundingBox();
 	}
-	Draw(program);
+	Draw(program, lightPosition);
 }
 
 void Sim::ResolveCollison(){
