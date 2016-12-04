@@ -71,6 +71,8 @@ private:
 	AABB aabbCoords;
 
 	bool isPlane = false;
+	bool isElements = false;
+
 	vec3 normal;
 	vec3 pointOnPlane;
 
@@ -95,6 +97,7 @@ private:
 	enum {
 		POSITION_VB,
 		COLOR_VB,
+		NORMAL_VB,
 		INDICES_VB,
 
 		NUM_BUFFERS
