@@ -105,14 +105,16 @@ void Object::CheckIfSolid() {
 		GLushort indRef[3];
 
 		indRef[0] = indices[i];
-		indRef[1] = indices[i+1];
-		indRef[2] = indices[i+2];
-		
+		indRef[1] = indices[i + 1];
+		indRef[2] = indices[i + 2];
+
+		//each edge must be shared for an object to be solid
 		bool edgeShared01 = false;
 		bool edgeShared12 = false;
 		bool edgeShared20 = false;
 
-		//each edge must be shared for an object to be solid
+		solid = false;
+
 
 		for (unsigned int j = 0; j < indices.size(); j += 3) {
 			if (j == i) continue;
@@ -122,36 +124,48 @@ void Object::CheckIfSolid() {
 			indTarg[0] = indices[j];
 			indTarg[1] = indices[j + 1];
 			indTarg[2] = indices[j + 2];
-
+			
 			// 01
-			if (indRef[0] == indTarg[0] && indRef[1] == indTarg[1])
-				edgeShared01 = true;
-			if (indRef[0] == indTarg[1] && indRef[1] == indTarg[0])
-				edgeShared01 = true;
+			edgeShared01 |= (indRef[0] == indTarg[0] && indRef[1] == indTarg[1]);
+			edgeShared01 |= (indRef[0] == indTarg[1] && indRef[1] == indTarg[2]);
+			edgeShared01 |= (indRef[0] == indTarg[2] && indRef[1] == indTarg[0]);
+
+			edgeShared01 |= (indRef[0] == indTarg[1] && indRef[1] == indTarg[0]);
+			edgeShared01 |= (indRef[0] == indTarg[2] && indRef[1] == indTarg[1]);
+			edgeShared01 |= (indRef[0] == indTarg[0] && indRef[1] == indTarg[2]);
 
 			// 12
-			if (indRef[1] == indTarg[1] && indRef[2] == indTarg[2])
-				edgeShared12 = true;
-			if (indRef[1] == indTarg[2] && indRef[2] == indTarg[1])
-				edgeShared12 = true;
+			edgeShared12 |= (indRef[1] == indTarg[0] && indRef[2] == indTarg[1]);
+			edgeShared12 |= (indRef[1] == indTarg[1] && indRef[2] == indTarg[2]);
+			edgeShared12 |= (indRef[1] == indTarg[2] && indRef[2] == indTarg[0]);
 
-			// 20
-			if (indRef[2] == indTarg[2] && indRef[0] == indTarg[0])
-				edgeShared20 = true;
-			if (indRef[2] == indTarg[0] && indRef[0] == indTarg[2])
-				edgeShared20 = true;
+			edgeShared12 |= (indRef[1] == indTarg[1] && indRef[2] == indTarg[0]);
+			edgeShared12 |= (indRef[1] == indTarg[2] && indRef[2] == indTarg[1]);
+			edgeShared12 |= (indRef[1] == indTarg[0] && indRef[2] == indTarg[2]);
 
+			/// 20
+			edgeShared20 |= (indRef[2] == indTarg[0] && indRef[0] == indTarg[1]);
+			edgeShared20 |= (indRef[2] == indTarg[1] && indRef[0] == indTarg[2]);
+			edgeShared20 |= (indRef[2] == indTarg[2] && indRef[0] == indTarg[0]);
 
+			edgeShared20 |= (indRef[2] == indTarg[1] && indRef[0] == indTarg[0]);
+			edgeShared20 |= (indRef[2] == indTarg[2] && indRef[0] == indTarg[1]);
+			edgeShared20 |= (indRef[2] == indTarg[0] && indRef[0] == indTarg[2]);
 		}
-
 		if (!edgeShared01 || !edgeShared12 || !edgeShared20) {
+			std::cout << edgeShared01 << std::endl;
+			std::cout << edgeShared12 << std::endl;
+			std::cout << edgeShared20 << std::endl;
+
 			solid = false;
-			std::cout << "Object is not solid." << std::endl;
-			return;
+			std::cout << " no triangle found object is not solid" << std::endl;
 		}
-		std::cout << "Object is solid." << std::endl;
-		solid = true;
+		else {
+			std::cout << "triangle found object is solid" << std::endl;
+		}
 	}
+	
+	
 }
 
 
