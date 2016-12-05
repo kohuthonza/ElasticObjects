@@ -382,7 +382,7 @@ void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset
 	
 	GenerateBoundingBox();
 
-	const float SpringForce = 40.0;
+	const float SpringForce = 2000.0f;
 	GenerateSprings(SpringForce);
 
 
@@ -420,167 +420,6 @@ void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset
 	glBindVertexArray(0);
 }
 
-
-
-void Object::InitTest() {
-
-	verts.push_back(new Vertex(vec3(-1.0, -1.0, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(1.0, -1.0, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(1.0, 1.0, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(-1.0, 1.0, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-
-
-	vertices.push_back(verts[0]->pos);
-	vertices.push_back(verts[1]->pos);
-	vertices.push_back(verts[2]->pos);
-	vertices.push_back(verts[3]->pos);
-
-	indices.push_back(0);
-	indices.push_back(2);
-	indices.push_back(1);
-
-	indices.push_back(0);
-	indices.push_back(3);
-	indices.push_back(2);
-
-	AddSpring(0, 1, 1000.0f);
-	AddSpring(1, 2, 1000.0f);
-	AddSpring(3, 2, 1000.0f);
-	AddSpring(0, 3, 1000.0f);
-	AddSpring(0, 2, 1000.0f);
-	AddSpring(1, 3, 1000.0f);
-
-	colors.push_back(red);
-	colors.push_back(red);
-	colors.push_back(red);
-	colors.push_back(red);
-
-	glGenVertexArrays(1, &vertexArrayObject);
-	glBindVertexArray(vertexArrayObject);
-
-	//positions
-	glGenBuffers(NUM_BUFFERS, vertexArrayBuffers);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_DYNAMIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//colors
-	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[COLOR_VB]);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(colors), &colors[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//indices
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexArrayBuffers[INDICES_VB]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
-}
-
-void Object::InitTestHexa() {
-	verts.push_back(new Vertex(vec3(-0.25, 3.0, -1.0), vec3(0.4, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 2.0f));
-	verts.push_back(new Vertex(vec3(0.25, 3.0, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(1.0, 3.75, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(1.0, 4.25, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(0.25, 5.0, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(-0.25, 5.0, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(-1.0, 4.25, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-	verts.push_back(new Vertex(vec3(-1.0, 3.75, -1.0), vec3(0.0, 0.0, 0.0), vec3(0.0, 0.0, 0.0), 1.0f));
-
-	vertices.push_back(verts[0]->pos);
-	vertices.push_back(verts[1]->pos);
-	vertices.push_back(verts[2]->pos);
-	vertices.push_back(verts[3]->pos);
-	vertices.push_back(verts[4]->pos);
-	vertices.push_back(verts[5]->pos);
-	vertices.push_back(verts[6]->pos);
-	vertices.push_back(verts[7]->pos);
-
-	indices.push_back(0);
-	indices.push_back(2);
-	indices.push_back(1);
-
-	indices.push_back(0);
-	indices.push_back(3);
-	indices.push_back(2);
-
-	indices.push_back(0);
-	indices.push_back(4);
-	indices.push_back(3);
-
-	indices.push_back(0);
-	indices.push_back(5);
-	indices.push_back(4);
-
-	indices.push_back(0);
-	indices.push_back(6);
-	indices.push_back(5);
-
-	indices.push_back(0);
-	indices.push_back(7);
-	indices.push_back(6);
-
-	AddSpring(0, 6, 100.0f);
-	AddSpring(0, 5, 100.0f);
-	AddSpring(0, 4, 100.0f);
-	AddSpring(0, 3, 100.0f);
-
-	AddSpring(1, 7, 100.0f);
-	AddSpring(1, 6, 100.0f);
-	AddSpring(1, 5, 100.0f);
-	AddSpring(1, 4, 100.0f);
-
-	AddSpring(2, 7, 1.0f);
-	AddSpring(2, 6, 1.0f);
-	AddSpring(2, 5, 1.0f);
-	AddSpring(2, 0, 1.0f);
-
-	AddSpring(0, 1, 1.0f);
-	AddSpring(1, 2, 1.0f);
-	AddSpring(2, 3, 1.0f);
-	AddSpring(3, 4, 1.0f);
-	AddSpring(4, 5, 1.0f);
-	AddSpring(5, 6, 1.0f);
-	AddSpring(6, 7, 1.0f);
-	AddSpring(7, 0, 1.0f);
-
-	colors.push_back(green);
-	colors.push_back(green);
-	colors.push_back(green);
-	colors.push_back(green);
-	colors.push_back(green);
-	colors.push_back(green);
-	colors.push_back(green);
-	colors.push_back(green);
-
-	glGenVertexArrays(1, &vertexArrayObject);
-	glBindVertexArray(vertexArrayObject);
-
-	//positions
-	glGenBuffers(NUM_BUFFERS, vertexArrayBuffers);
-	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[POSITION_VB]);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vertices[0]), &vertices[0], GL_DYNAMIC_DRAW);
-
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//colors
-	glBindBuffer(GL_ARRAY_BUFFER, vertexArrayBuffers[COLOR_VB]);
-	glBufferData(GL_ARRAY_BUFFER, colors.size() * sizeof(colors), &colors[0], GL_STATIC_DRAW);
-
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	//indices
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vertexArrayBuffers[INDICES_VB]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(indices[0]), &indices[0], GL_STATIC_DRAW);
-
-	glBindVertexArray(0);
-}
-
 void Object::Solve() {
 	if (isPlane)
 		return;
@@ -600,7 +439,7 @@ void Object::Simulate(float dt) {
 
 		verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
 
-		/*if (solid) {
+		if (solid) {
 			//Calculate the pressure value
 			//const float Na = 6.02214e23; //- Avogardo number
 			//const float kb = 1.380648e-23; //- Bolzman konstant
@@ -632,10 +471,7 @@ void Object::Simulate(float dt) {
 			}
 			verts[i]->ApplyForce(InsideForceSum);
 		}		
-		*/
 	}
-	
-
 
 	for (unsigned int i = 0; i < verts.size(); ++i) {
 		verts[i]->vel += (verts[i]->force / verts[i]->mass) * dt;
@@ -647,7 +483,7 @@ void Object::Simulate(float dt) {
 		verts[i]->force = vec3(0, 0, 0);
 	}
 
-	//UpdateNormals();
+	UpdateNormals();
 
 	verticesToDraw.clear();
 	normalsToDraw.clear();
@@ -802,8 +638,8 @@ void Object::ResolveVertices(Object * other) {
 					vec3 v1_ = ObjectA->vel - optimizedP * ObjectB->mass * nn;
 					vec3 v2_ = ObjectB->vel + optimizedP * ObjectA->mass * nn;
 
-					ObjectB->vel = v1_;
-					ObjectA->vel = v2_;
+					ObjectB->vel = v1_*0.85f;
+					ObjectA->vel = v2_*0.85f;
 					
 				}
 			}

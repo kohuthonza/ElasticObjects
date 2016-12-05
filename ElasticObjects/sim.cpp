@@ -4,21 +4,21 @@
 
 Sim::Sim() {
 	
-	objects.push_back(new Object(glm::vec3(-1, 0, 0), glm::vec3(3, -2.5, -1), glm::vec3(3, -4.5, -1), 5.f));
-	objects.back()->GenerateBoundingBox();
+	//objects.push_back(new Object(glm::vec3(-1, 0, 0), glm::vec3(3, -2.5, -1), glm::vec3(3, -4.5, -1), 5.f));
+	//objects.back()->GenerateBoundingBox();
 	
-	objects.push_back(new Object());
-	objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", 1.1f, glm::vec3(2, 2, 0), glm::vec3(-3, 0, 0));
+	//objects.push_back(new Object());
+	//objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", 1.1f, glm::vec3(2, 2, 0), glm::vec3(-3, 0, 0));
+	//objects.back()->GenerateBoundingBox();
+
+	//objects.push_back(new Object());
+	//objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", 1.1f, glm::vec3(-2, 2, 0), glm::vec3(3, 0, 0));
+	//objects.back()->GenerateBoundingBox();
+
+	objects.push_back(new Object(glm::vec3(0, -1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));
 	objects.back()->GenerateBoundingBox();
 
-	objects.push_back(new Object());
-	objects.back()->InitOBJTest("obj_models\\simple_sphere.obj", 1.1f, glm::vec3(-2, 2, 0), glm::vec3(3, 0, 0));
-	objects.back()->GenerateBoundingBox();
-
-	objects.push_back(new Object(glm::vec3(0, 1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));
-	objects.back()->GenerateBoundingBox();
-
-	objects.push_back(new Object(glm::vec3(0, 0, 1), glm::vec3(0, 2.5, -2), glm::vec3(3, 2.5, -2), 5.f));
+	objects.push_back(new Object(glm::vec3(0, 0, -1), glm::vec3(0, 2.5, -2), glm::vec3(3, 2.5, -2), 5.f));
 	objects.back()->GenerateBoundingBox();
 	
 	/*

@@ -43,7 +43,7 @@ void SimTest(int milliseconds) {
 	float dt = milliseconds / 1000.f;
 	int numOfIterations = (int)(dt / maxPossible_dt) + 1;
 
-	static const float slowMotionRatio = 50.0f;
+	static const float slowMotionRatio = 20.0f;
 	static float timeElapsed = 0.f;
 
 	dt /= slowMotionRatio;

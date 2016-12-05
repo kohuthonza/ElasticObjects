@@ -15,7 +15,7 @@ private:
 	float springConstant;
 	float springLength;
 
-	const float airFrictionConstant = 0.2f;
+	const float springFrictionConstant = 0.6f;
 
 public:
 	Spring(unsigned int _index1, unsigned int _index2, Vertex *$point1, Vertex *$point2, float springLen, float springConst);

@@ -23,7 +23,7 @@ void Spring::Solve() {
 	if (r != 0.0f)
 		force += -(springVector / r) * (r - springLength) * springConstant;
 
-	force += -(point1->vel - point2->vel)*airFrictionConstant;
+	force += -(point1->vel - point2->vel)*springFrictionConstant;
 	point1->ApplyForce(force);
 	point2->ApplyForce(-force);
 }
