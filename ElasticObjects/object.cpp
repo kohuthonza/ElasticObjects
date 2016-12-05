@@ -5,6 +5,8 @@
 #include <chrono>
 #include <string>
 
+#define EPSILON 0.0001
+
 float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 	glm::vec3 VectorAB = A - B;
 	glm::vec3 VectorAC = A - C;
@@ -16,8 +18,6 @@ float TriangleArea(glm::vec3 A, glm::vec3 B, glm::vec3 C) {
 
 bool Object::VectorIntersectsTriangle(/* VECTOR: */ glm::vec3 Origin, glm::vec3 Dir, /* TRIANGLE: */ glm::vec3 V1, glm::vec3 V2, glm::vec3 V3) {
 	/* Möller–Trumbore intersection algorithm, pseudo-code source: https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm */
-
-#define EPSILON 0.0001
 
 	glm::vec3 e1, e2;  //Edge1, Edge2
 	glm::vec3 P, Q, T;
@@ -638,9 +638,11 @@ void Object::ResolveVertices(Object * other) {
 					vec3 v1_ = ObjectA->vel - optimizedP * ObjectB->mass * nn;
 					vec3 v2_ = ObjectB->vel + optimizedP * ObjectA->mass * nn;
 
-					ObjectB->vel = v1_*0.85f;
-					ObjectA->vel = v2_*0.85f;
-					
+					//ObjectB->vel = v1_*0.85f;
+					//ObjectA->vel = v2_*0.85f;
+
+					ObjectA->ApplyForce(v1_ * 50.f);
+					ObjectB->ApplyForce(v2_ * 50.f);
 				}
 			}
 		}
