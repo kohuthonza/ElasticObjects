@@ -691,14 +691,18 @@ void Object::UpdateNormals() {
 		normals[i / 3] = CalculateSurfaceNormal(v[0], v[1], v[2]);
 	}
 }
-void Object::Draw(GLuint program, glm::vec3 lightPosition) {
+void Object::Draw(GLuint program, glm::vec3 cameraPosition) {
 
 	GLuint ambientLightUniformLocation = glGetUniformLocation(program, "ambientLight");
 	vec3 ambientLight(0.2f, 0.2f, 0.2f);
 	glUniform3fv(ambientLightUniformLocation, 1, &ambientLight[0]);
 
 	GLuint lightPositionUniformLocation = glGetUniformLocation(program, "lightPosition");
+	vec3 lightPosition(2.0f, -4.0f, 0.0f);
 	glUniform3fv(lightPositionUniformLocation, 1, &lightPosition[0]);
+
+	GLuint eyePositionLocation = glGetUniformLocation(program, "eyePosition");
+	glUniform3fv(eyePositionLocation, 1, &cameraPosition[0]);
 
 	glBindVertexArray(vertexArrayObject);
 
