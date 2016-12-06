@@ -344,7 +344,7 @@ void Object::GenerateSprings(const float Force) {
 }
 
 
-void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
+void Object::InitOBJTest(std::string FilePath, const float Mass, float springForce, glm::vec3 offset = glm::vec3(0, 0, 0), glm::vec3 initialVel = glm::vec3(0, 0, 0)) {
 
 	OBJ_Loader obj(FilePath);
 	vertices = obj.getVertices();
@@ -382,8 +382,7 @@ void Object::InitOBJTest(std::string FilePath, const float Mass,glm::vec3 offset
 	
 	GenerateBoundingBox();
 
-	const float SpringForce = 2000.0f;
-	GenerateSprings(SpringForce);
+	GenerateSprings(springForce);
 
 
 	CalculateBodyVolume_AABB();
@@ -610,22 +609,22 @@ void Object::ResolveVertices(Object * other) {
 		for (unsigned int i = 0; i < verts.size(); ++i) {
 			for (unsigned int j = 0; j < other->GetVerts().size(); ++j) {
 				float dist = glm::distance(verts[i]->pos, other->GetVerts()[j]->pos);
-				if (dist <= 0.5f) {
+				if (dist <= 0.8f) {
 					auto ObjectA = verts[i];
 					auto ObjectB = other->GetVerts()[j];
-					
-					/*vec3 nv1, nv2;
+					/*
+					vec3 v1_, v2_;
 
-					nv1 = ObjectA->vel;
-					nv1 += projectUonV(ObjectB->vel, ObjectB->pos - ObjectA->pos);
-					nv1 -= projectUonV(ObjectA->vel, ObjectA->pos - ObjectB->pos);
+					v1_ = ObjectA->vel;
+					v1_ += projectUonV(ObjectB->vel, ObjectB->pos - ObjectA->pos);
+					v1_ -= projectUonV(ObjectA->vel, ObjectA->pos - ObjectB->pos);
 
-					nv2 = ObjectB->vel;
-					nv2 += projectUonV(ObjectA->vel, ObjectB->pos - ObjectA->pos);
-					nv2 -= projectUonV(ObjectB->vel, ObjectA->pos - ObjectB->pos);
+					v2_ = ObjectB->vel;
+					v2_ += projectUonV(ObjectA->vel, ObjectB->pos - ObjectA->pos);
+					v2_ -= projectUonV(ObjectB->vel, ObjectA->pos - ObjectB->pos);
 
-					ObjectA->vel = nv1;;
-					ObjectB->vel = nv2;;
+					ObjectA->vel = v1_;;
+					ObjectB->vel = v2_;;
 					*/
 					
 					vec3 n = ObjectA->pos - ObjectB->pos;
@@ -634,18 +633,21 @@ void Object::ResolveVertices(Object * other) {
 					float a1 = glm::dot(ObjectA->vel, nn);
 					float a2 = glm::dot(ObjectB->vel, nn);
 
-					float optimizedP = (float) (1.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
+					float optimizedP = (float) (2.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
 					vec3 v1_ = ObjectA->vel - optimizedP * ObjectB->mass * nn;
 					vec3 v2_ = ObjectB->vel + optimizedP * ObjectA->mass * nn;
+					
+						ObjectA->vel = v1_;						
+						//ObjectA->pos += (1.0f / (dist))*glm::normalize(v1_)*0.05f;
+						//ObjectA->ApplyForce(v1_*10.0f);
+			
 
-					//ObjectB->vel = v1_*0.85f;
-					//ObjectA->vel = v2_*0.85f;
-
-					ObjectA->ApplyForce(v1_ * 50.f);
-					ObjectB->ApplyForce(v2_ * 50.f);
+						ObjectB->vel = v2_;
+						//ObjectB->pos += (1.0f / (dist))*glm::normalize(v2_)*0.05f;
+						//ObjectB->ApplyForce(v2_*10.0f);
+									
 				}
 			}
 		}
 	}
 }
-

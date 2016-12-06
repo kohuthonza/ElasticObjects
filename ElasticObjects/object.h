@@ -27,7 +27,7 @@ public:
 
 	void AddSpring(int point1, int point2, float springConstat);
 
-	void InitOBJTest(std::string FilePath, const float Mass, glm::vec3 offset, glm::vec3 initialVel);
+	void InitOBJTest(std::string FilePath, const float Mass, float springForce, glm::vec3 offset, glm::vec3 initialVel);
 
 	void Solve();
 

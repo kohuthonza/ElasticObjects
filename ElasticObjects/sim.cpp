@@ -23,7 +23,7 @@ Sim::Sim() {
 	
 	
 	//objects.push_back(new Object());
-	//objects.back()->InitOBJTest("obj_models\\bunny_reduced_600faces.obj", 1.1f, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
+	//objects.back()->InitOBJTest("obj_models\\bunny_reduced_600faces.obj", 0.1f, glm::vec3(0, 0, 0), glm::vec3(0, 0, 0));
 	//objects.back()->GenerateBoundingBox();
 	
 }
@@ -49,11 +49,11 @@ void Sim::Draw(GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition
 }
 
 void Sim::Operate(float dt, GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition) {
-	init();
-	Solve();	
-	if (!stop) {		
-		Simulate(dt);
+	init();		
+	if (!stop) {	
 		ResolveCollison();
+		Solve();		
+		Simulate(dt);		
 		RecomputeBoundingBox();
 	}
 	Draw(program, cameraPosition, lightPosition);
