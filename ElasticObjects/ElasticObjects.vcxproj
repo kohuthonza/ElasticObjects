@@ -120,6 +120,7 @@
   <ItemGroup>
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="display.cpp" />
+    <ClCompile Include="lightPosition.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="object.cpp" />
     <ClCompile Include="OBJ_Loader.cpp" />
@@ -135,6 +136,7 @@
   <ItemGroup>
     <ClInclude Include="camera.h" />
     <ClInclude Include="display.h" />
+    <ClInclude Include="lightPosition.h" />
     <ClInclude Include="object.h" />
     <ClInclude Include="OBJ_Loader.h" />
     <ClInclude Include="plane.h" />

@@ -34,7 +34,7 @@ Display::Display(int w, int h, const std::string &name){
 
 static int oldX = 0, oldY = 0;
 
-void Display::Update(Camera &camera, Sim &sim){
+void Display::Update(Camera &camera, LightPosition &light, Sim &sim){
 	SDL_GL_SwapWindow(window);
 
 	SDL_Event e;
@@ -58,6 +58,24 @@ void Display::Update(Camera &camera, Sim &sim){
 						break;
 					case SDLK_DOWN:
 						camera.GetPos() = camera.GetPos() - camera.GetFwd() * 0.05f;
+						break;
+					case SDLK_i:
+						light.GetPos() += glm::vec3(0.0f, 0.2f, 0.0f);
+						break;
+					case SDLK_k:
+						light.GetPos() -= glm::vec3(0.0f, 0.2f, 0.0f);
+						break;
+					case SDLK_l:
+						light.GetPos() += glm::vec3(0.2f, 0.0f, 0.0f);
+						break;
+					case SDLK_j:
+						light.GetPos() -= glm::vec3(0.2f, 0.0f, 0.0f);
+						break;
+					case SDLK_u:
+						light.GetPos() -= glm::vec3(0.0f, 0.0f, 0.2f);
+						break;
+					case SDLK_o:
+						light.GetPos() += glm::vec3(0.0f, 0.0f, 0.2f);
 						break;
 					case SDLK_p:						
 						sim.ToggleStop();
