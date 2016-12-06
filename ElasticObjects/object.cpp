@@ -420,7 +420,7 @@ void Object::InitOBJTest(std::string FilePath, const float Mass, float springFor
 }
 
 void Object::Solve() {
-	if (isPlane)
+	if (isPlane || !solid)
 		return;
 
 	//std::cout << "spring solve" << std::endl << std::flush;
@@ -644,8 +644,7 @@ void Object::ResolveVertices(Object * other) {
 
 						ObjectB->vel = v2_;
 						//ObjectB->pos += (1.0f / (dist))*glm::normalize(v2_)*0.05f;
-						//ObjectB->ApplyForce(v2_*10.0f);
-									
+						//ObjectB->ApplyForce(v2_*10.0f);									
 				}
 			}
 		}

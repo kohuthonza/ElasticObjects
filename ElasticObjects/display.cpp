@@ -83,7 +83,7 @@ void Display::Update(Camera &camera, vec3 &lightPosition, Sim &sim){
 					case SDLK_SPACE: {
 						glm::vec3 spherepos = camera.GetPos() + camera.GetFwd()*2.0f;
 						sim.GetObjects().push_back(new Object());
-						sim.GetObjects().back()->InitOBJTest("obj_models\\simple_sphere.obj", 2.0f, 2000.0f, spherepos, camera.GetFwd() * 50.0f);
+						sim.GetObjects().back()->InitOBJTest("obj_models\\sphere3.obj", 2.0f, 2000.0f, spherepos, camera.GetFwd() * 50.0f);
 						sim.GetObjects().back()->GenerateBoundingBox();
 						break;
 					}
