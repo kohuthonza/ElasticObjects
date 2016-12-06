@@ -4,13 +4,14 @@
 #include <SDL.h>
 
 #include "camera.h"
+#include "lightPosition.h"
 #include "sim.h"
 
 class Display {
 public:
 	Display(int w, int h, const std::string &name);
 
-	void Update(Camera &camera, Sim &sim);
+	void Update(Camera &camera, vec3 &lightPosition, Sim &sim);
 
 	bool IsClosed();
 

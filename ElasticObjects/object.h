@@ -27,17 +27,13 @@ public:
 
 	void AddSpring(int point1, int point2, float springConstat);
 
-	void InitTest();
-
-	void InitTestHexa();
-
 	void InitOBJTest(std::string FilePath, const float Mass, glm::vec3 offset, glm::vec3 initialVel);
 
 	void Solve();
 
 	void Simulate(float dt);
 
-	void Draw(GLuint program, glm::vec3 lightPosition);
+	void Draw(GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition);
 
 	void GenerateBoundingBox();
 
