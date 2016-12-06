@@ -152,20 +152,23 @@ void Object::CheckIfSolid() {
 			edgeShared20 |= (indRef[2] == indTarg[2] && indRef[0] == indTarg[1]);
 			edgeShared20 |= (indRef[2] == indTarg[0] && indRef[0] == indTarg[2]);
 		}
-		if (!edgeShared01 || !edgeShared12 || !edgeShared20) {
-			std::cout << edgeShared01 << std::endl;
-			std::cout << edgeShared12 << std::endl;
-			std::cout << edgeShared20 << std::endl;
 
+		//std::cout << i << std::endl;
+		//std::cout << edgeShared01 << std::endl;
+		//std::cout << edgeShared12 << std::endl;
+		//std::cout << edgeShared20 << std::endl;
+
+		if (!edgeShared01 || !edgeShared12 || !edgeShared20) {
 			solid = false;
-			std::cout << " no triangle found object is not solid" << std::endl;
+			return;
+			//std::cout << " no triangle found object is not solid" << std::endl;
 		}
 		else {
-			std::cout << "triangle found object is solid" << std::endl;
+			//std::cout << "triangle found object is solid" << std::endl;
 		}
 	}
-	
-	
+
+	solid = true;
 }
 
 
@@ -236,7 +239,7 @@ void Object::CalculateBodyVolume_MC() {
 void Object::CalculateBodyVolume_AABB() {
 	CheckIfSolid();
 	if (solid) {
-		std::cout << "Calculating body volume... ";
+		std::cout << "Object is solid. Calculating body volume AABB... ";
 
 
 		AABB *BBCoords = GetAABB();
@@ -540,7 +543,7 @@ void Object::Simulate(float dt) {
 				//std::cout << "FaceArea = " << FaceArea << std::endl;
 			}
 			verts[i]->ApplyForce(InsideForceSum);
-		}		
+		}
 	}
 
 	for (unsigned int i = 0; i < verts.size(); ++i) {
