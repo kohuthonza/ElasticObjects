@@ -37,8 +37,9 @@ void SimTest(int milliseconds) {
 	Shader shader("basic");
 	Transform transform;
 	Camera camera(glm::vec3(0, 0, 10), 70.0f, (float)(WIDTH / HEIGHT), 0.01f, 1000.0f);
-	LightPosition light(glm::vec3(2.0f, -4.0f, 0.0f));
-	
+	vec3 lightPosition(2.0f, -4.0f, 0.0f);
+
+
 	unsigned int frameCounter = 0;
 
 	float maxPossible_dt = 0.1f;
@@ -63,9 +64,9 @@ void SimTest(int milliseconds) {
 		shader.Bind();
 		shader.Update(transform, camera);
 
-		ms.Operate(dt, shader.GetProgram(), camera.GetPos(), light.GetPos());
+		ms.Operate(dt, shader.GetProgram(), camera.GetPos(), lightPosition);
 
-		display.Update(camera, light, ms);
+		display.Update(camera, lightPosition, ms);
 
 		frameCounter++;
 		//UpdateFPS(frameCounter);

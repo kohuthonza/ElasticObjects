@@ -11,7 +11,7 @@ class Display {
 public:
 	Display(int w, int h, const std::string &name);
 
-	void Update(Camera &camera, LightPosition &light, Sim &sim);
+	void Update(Camera &camera, vec3 &lightPosition, Sim &sim);
 
 	bool IsClosed();
 
