@@ -432,19 +432,19 @@ void Object::Solve() {
 void Object::Simulate(float dt) {
 	if (isPlane)
 		return;
-
+	
 	for (unsigned int i = 0; i < verts.size(); ++i) {
 		verts[i]->ApplyForce(gravitation * verts[i]->mass);
 
 		verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
-
+		/*
 		if (solid) {
 			//Calculate the pressure value
 			//const float Na = 6.02214e23; //- Avogardo number
 			//const float kb = 1.380648e-23; //- Bolzman konstant
 			//float R = Na * kb;
 			float R = 8.3144598; //- ideal gas constant (https://en.wikipedia.org/wiki/Gas_constant)
-			float Temperature = 1; //- Temperature in Kelvin
+			float Temperature = 10; //- Temperature in Kelvin
 
 			glm::vec3 InsideForceSum(0.0, 0.0, 0.0);
 
@@ -469,9 +469,10 @@ void Object::Simulate(float dt) {
 				//std::cout << "FaceArea = " << FaceArea << std::endl;
 			}
 			verts[i]->ApplyForce(InsideForceSum);
-		}		
+		}
+		*/
 	}
-
+	
 	for (unsigned int i = 0; i < verts.size(); ++i) {
 		verts[i]->vel += (verts[i]->force / verts[i]->mass) * dt;
 		vec3 newPosVector = verts[i]->vel * dt;
@@ -608,43 +609,22 @@ void Object::ResolveVertices(Object * other) {
 	else {
 		for (unsigned int i = 0; i < verts.size(); ++i) {
 			for (unsigned int j = 0; j < other->GetVerts().size(); ++j) {
-				float dist = glm::distance(verts[i]->pos, other->GetVerts()[j]->pos);
-				if (dist <= 0.8f) {
-					auto ObjectA = verts[i];
-					auto ObjectB = other->GetVerts()[j];
-					/*
-					vec3 v1_, v2_;
+				auto ObjectA = verts[i];
+				auto ObjectB = other->GetVerts()[j];
 
-					v1_ = ObjectA->vel;
-					v1_ += projectUonV(ObjectB->vel, ObjectB->pos - ObjectA->pos);
-					v1_ -= projectUonV(ObjectA->vel, ObjectA->pos - ObjectB->pos);
+				if (glm::distance(ObjectA->pos, ObjectB->pos) < 0.5f) {
+					vec3 normal = glm::normalize(ObjectB->pos - ObjectA->pos);
+					float collisionSpeed = glm::dot((ObjectA->vel - ObjectB->vel), normal);
+					collisionSpeed *= 0.005f;
 
-					v2_ = ObjectB->vel;
-					v2_ += projectUonV(ObjectA->vel, ObjectB->pos - ObjectA->pos);
-					v2_ -= projectUonV(ObjectB->vel, ObjectA->pos - ObjectB->pos);
+					ObjectA->vel -= glm::dot(ObjectA->vel, normal)*0.05f;
+					ObjectB->vel -= glm::dot(ObjectB->vel, normal)*0.05f;
 
-					ObjectA->vel = v1_;;
-					ObjectB->vel = v2_;;
-					*/
-					
-					vec3 n = ObjectA->pos - ObjectB->pos;
-					vec3 nn = glm::normalize(n);
+					ObjectA->vel -= normal * collisionSpeed*0.0005f;
+					ObjectB->vel += normal * collisionSpeed*0.0005f;
 
-					float a1 = glm::dot(ObjectA->vel, nn);
-					float a2 = glm::dot(ObjectB->vel, nn);
-
-					float optimizedP = (float) (2.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
-					vec3 v1_ = ObjectA->vel - optimizedP * ObjectB->mass * nn;
-					vec3 v2_ = ObjectB->vel + optimizedP * ObjectA->mass * nn;
-					
-						ObjectA->vel = v1_;						
-						//ObjectA->pos += (1.0f / (dist))*glm::normalize(v1_)*0.05f;
-						//ObjectA->ApplyForce(v1_*10.0f);
-			
-
-						ObjectB->vel = v2_;
-						//ObjectB->pos += (1.0f / (dist))*glm::normalize(v2_)*0.05f;
-						//ObjectB->ApplyForce(v2_*10.0f);									
+					ObjectA->force = vec3(0, 0, 0);
+					ObjectB->force = vec3(0, 0, 0);
 				}
 			}
 		}
