@@ -612,8 +612,8 @@ void Object::ResolveVertices(Object * other) {
 				auto ObjectA = verts[i];
 				auto ObjectB = other->GetVerts()[j];
 
-				if (glm::distance(ObjectA->pos, ObjectB->pos) < 0.5f) {
-					vec3 normal = glm::normalize(ObjectB->pos - ObjectA->pos);
+				if (float d = glm::distance(ObjectA->pos, ObjectB->pos) < 0.5f) {
+					/*vec3 normal = glm::normalize(ObjectB->pos - ObjectA->pos);
 					float collisionSpeed = glm::dot((ObjectA->vel - ObjectB->vel), normal);
 					collisionSpeed *= 0.005f;
 
@@ -625,7 +625,43 @@ void Object::ResolveVertices(Object * other) {
 
 					ObjectA->force = vec3(0, 0, 0);
 					ObjectB->force = vec3(0, 0, 0);
-				}
+					*/
+					/*
+					vec3 n = glm::normalize(ObjectA->pos - ObjectB->pos);
+
+					float a1 = glm::dot(ObjectA->vel, n);
+					float a2 = glm::dot(ObjectB->vel, n);
+
+					float P = (2.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
+					vec3 v1_ = ObjectA->vel - P*ObjectB->mass*n;
+					vec3 v2_ = ObjectB->vel + P*ObjectA->mass*n;
+
+					ObjectA->vel = vec3(0,0,0);// v1_;
+					ObjectB->vel = vec3(0, 0, 0);// v2_;
+					*/
+
+					vec3 u1 = ObjectA->vel;
+					vec3 u2 = ObjectB->vel;
+
+					float m1 = ObjectA->mass;
+					float m2 = ObjectB->mass;
+
+					vec3 v1 = (u1*(m1 - m2) + 2 * m2*u2) / (m1 + m2);
+					vec3 v2 = (u2*(m2 - m1) + 2 * m1*u1) / (m1 + m2);
+
+					ObjectA->vel = v1;
+					ObjectB->vel = v2;
+					
+					ObjectA->pos += d*glm::normalize(ObjectA->pos - ObjectB->pos)*.005f;
+					ObjectB->pos -= d*glm::normalize(ObjectA->pos - ObjectB->pos)*.005f;
+
+					ObjectA->force = vec3(0, 0, 0);
+					ObjectA->ApplyForce(glm::normalize(v1)*20.0f);
+					
+					ObjectB->force = vec3(0, 0, 0);
+					ObjectB->ApplyForce(glm::normalize(v2)*20.0f);
+					
+				}				
 			}
 		}
 	}
