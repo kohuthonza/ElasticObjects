@@ -656,10 +656,10 @@ void Object::ResolveVertices(Object * other) {
 					ObjectB->pos -= d*glm::normalize(ObjectA->pos - ObjectB->pos)*.005f;
 
 					ObjectA->force = vec3(0, 0, 0);
-					ObjectA->ApplyForce(glm::normalize(v1)*20.0f);
+					ObjectA->ApplyForce(glm::normalize(v1)*200.0f);
 					
 					ObjectB->force = vec3(0, 0, 0);
-					ObjectB->ApplyForce(glm::normalize(v2)*20.0f);
+					ObjectB->ApplyForce(glm::normalize(v2)*200.0f);
 					
 				}				
 			}
