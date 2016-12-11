@@ -8,17 +8,26 @@ Sim::Sim() {
 	//objects.back()->GenerateBoundingBox();
 	
 	objects.push_back(new Object());
-	objects.back()->InitOBJTest("obj_models\\bunny_reduced_600faces.obj", 1.1f, 20.f,  glm::vec3(2, 2, 0), glm::vec3(0, 0, 0));
+	objects.back()->InitOBJTest("obj_models\\bunny_reduced_600faces.obj", 1.1f, 20.f,  glm::vec3(2, 0, 0), glm::vec3(0, 0, 0));
 	objects.back()->GenerateBoundingBox();
 
 	objects.push_back(new Object());
-	objects.back()->InitOBJTest("obj_models\\sphere2.obj", 1.1f, 20.0f, glm::vec3(-2, 2, 0), glm::vec3(0, 0, 0));
+	objects.back()->InitOBJTest("obj_models\\sphere2.obj", 1.1f, 20.0f, glm::vec3(-2, 0, 0), glm::vec3(0, 0, 0));
 	objects.back()->GenerateBoundingBox();
 
-	objects.push_back(new Object(glm::vec3(0, 1, 0), glm::vec3(0, -6.5, -1), glm::vec3(3, -6.5, -1), 5.f));
+	objects.push_back(new Object(glm::vec3(0, 1, 0), glm::vec3(0, -6.5, 0), glm::vec3(3, -6.5, 0), 5.f)); // down
 	objects.back()->GenerateBoundingBox();
 
-	objects.push_back(new Object(glm::vec3(0, 0, 1), glm::vec3(0, 2.5, -2), glm::vec3(3, 2.5, -2), 5.f));
+	objects.push_back(new Object(glm::vec3(0, -1, 0), glm::vec3(0, 3.5, 0), glm::vec3(3, 3.5, 0), 5.f)); // up
+	objects.back()->GenerateBoundingBox();
+
+	objects.push_back(new Object(glm::vec3(0, 0, 1), glm::vec3(0, -1.5, -5), glm::vec3(3, -1.5, -5), 5.f)); // back
+	objects.back()->GenerateBoundingBox();
+
+	objects.push_back(new Object(glm::vec3(-1, 0, 0), glm::vec3(5, -1.5, 0), glm::vec3(5, -1.5, -1), 5.f)); // right
+	objects.back()->GenerateBoundingBox();
+
+	objects.push_back(new Object(glm::vec3(1, 0, 0), glm::vec3(-5, -1.5, 0), glm::vec3(-5, -1.5, -1), 5.f)); //left
 	objects.back()->GenerateBoundingBox();
 	
 }
@@ -43,9 +52,19 @@ void Sim::Draw(GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition
 		objects[a]->Draw(program, cameraPosition, lightPosition);
 }
 
-void Sim::Operate(float dt, GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition) {
-	init();		
+void Sim::IsTooFar() {
+	for (unsigned int a = 0; a < objects.size(); ++a) {
+		if (glm::distance(objects[a]->GetVerts()[0]->pos, vec3(0, 0, 0)) > 50.f) {
+			delete objects[a];
+			objects.erase( objects.begin() + a );
+		}
+	}
+		
+}
+
+void Sim::Operate(float dt, GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition) {	
 	if (!stop) {	
+		IsTooFar();
 		ResolveCollison();
 		Solve();		
 		Simulate(dt);		

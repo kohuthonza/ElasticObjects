@@ -507,7 +507,7 @@ void Object::Simulate(float dt) {
 		verts[i]->ApplyForce(gravitation * verts[i]->mass);
 
 		verts[i]->ApplyForce(-verts[i]->vel * airFrictionConstant);
-		/*
+		
 		if (solid) {
 			//Calculate the pressure value
 			//const float Na = 6.02214e23; //- Avogardo number
@@ -540,7 +540,6 @@ void Object::Simulate(float dt) {
 			}
 			verts[i]->ApplyForce(InsideForceSum);
 		}
-		*/
 	}
 	
 	for (unsigned int i = 0; i < verts.size(); ++i) {
@@ -641,11 +640,17 @@ void Object::GenerateBoundingBox(){
 	aabbCoords.min = tempMin;
 }
 
-inline vec3 projectUonV(vec3 u, vec3 v) {
-	return ( v * ( glm::dot(u, v) / glm::dot(v, v) ) );
+inline float MAX(float a, float b) {
+	if (a > b)
+		return a;
+	else
+		return b;
 }
 
 void Object::ResolveVertices(Object * other) {
+	static const float percent = 0.2f; // usually 20% to 80%
+	static const float slop = 0.1f; // usually 0.01 to 0.1
+	static vec3 correction;
 	
 	if (isPlane || other->isPlane) {
 		Object *planeObject;
@@ -661,9 +666,9 @@ void Object::ResolveVertices(Object * other) {
 		
 
 		for (unsigned int i = 0; i < generalObject->GetVerts().size(); ++i) {
-			float distance = glm::dot((generalObject->GetVerts()[i]->pos - planeObject->pointOnPlane), planeObject->normal);
+			float dist = glm::dot((generalObject->GetVerts()[i]->pos - planeObject->pointOnPlane), planeObject->normal);
 
-			if (abs(distance) < 0.5f) {				
+			if (abs(dist) < 0.3f) {
 				vec3 rv = -generalObject->GetVerts()[i]->vel;
 				float velAlongNormal = glm::dot(rv, planeObject->normal);
 				float e = 0.5f;
@@ -672,7 +677,13 @@ void Object::ResolveVertices(Object * other) {
 				j /= 1 / generalObject->GetVerts()[i]->mass;
 
 				vec3 impulse = j * planeObject->normal;
-				generalObject->GetVerts()[i]->vel -= (1.0f / generalObject->GetVerts()[i]->mass) * impulse;
+				generalObject->GetVerts()[i]->vel -= (1.0f / generalObject->GetVerts()[i]->mass) * impulse * 0.85f;
+
+				correction = (MAX(dist - slop, 0.0f) / (generalObject->GetVerts()[i]->mass)) * percent * planeObject->normal;
+				generalObject->GetVerts()[i]->pos += generalObject->GetVerts()[i]->mass * correction;
+
+				vec3 fric = rv - generalObject->GetVerts()[i]->vel;
+				generalObject->GetVerts()[i]->ApplyForce(glm::normalize(fric)*20.0f);
 			}
 		}		
 	}
@@ -683,33 +694,6 @@ void Object::ResolveVertices(Object * other) {
 				auto ObjectB = other->GetVerts()[j];
 
 				if (float d = glm::distance(ObjectA->pos, ObjectB->pos) < 0.5f) {
-					/*vec3 normal = glm::normalize(ObjectB->pos - ObjectA->pos);
-					float collisionSpeed = glm::dot((ObjectA->vel - ObjectB->vel), normal);
-					collisionSpeed *= 0.005f;
-
-					ObjectA->vel -= glm::dot(ObjectA->vel, normal)*0.05f;
-					ObjectB->vel -= glm::dot(ObjectB->vel, normal)*0.05f;
-
-					ObjectA->vel -= normal * collisionSpeed*0.0005f;
-					ObjectB->vel += normal * collisionSpeed*0.0005f;
-
-					ObjectA->force = vec3(0, 0, 0);
-					ObjectB->force = vec3(0, 0, 0);
-					*/
-					/*
-					vec3 n = glm::normalize(ObjectA->pos - ObjectB->pos);
-
-					float a1 = glm::dot(ObjectA->vel, n);
-					float a2 = glm::dot(ObjectB->vel, n);
-
-					float P = (2.0f * (a1 - a2)) / (ObjectA->mass + ObjectB->mass);
-					vec3 v1_ = ObjectA->vel - P*ObjectB->mass*n;
-					vec3 v2_ = ObjectB->vel + P*ObjectA->mass*n;
-
-					ObjectA->vel = vec3(0,0,0);// v1_;
-					ObjectB->vel = vec3(0, 0, 0);// v2_;
-					*/
-
 					vec3 u1 = ObjectA->vel;
 					vec3 u2 = ObjectB->vel;
 
@@ -719,17 +703,15 @@ void Object::ResolveVertices(Object * other) {
 					vec3 v1 = (u1*(m1 - m2) + 2 * m2*u2) / (m1 + m2);
 					vec3 v2 = (u2*(m2 - m1) + 2 * m1*u1) / (m1 + m2);
 
-					ObjectA->vel = v1;
-					ObjectB->vel = v2;
+					ObjectA->vel = v1*0.85f;
+					ObjectB->vel = v2*0.85f;
 					
 					ObjectA->pos += d*glm::normalize(ObjectA->pos - ObjectB->pos)*.005f;
 					ObjectB->pos -= d*glm::normalize(ObjectA->pos - ObjectB->pos)*.005f;
 
-					ObjectA->force = vec3(0, 0, 0);
-					ObjectA->ApplyForce(glm::normalize(v1)*200.0f);
+					ObjectA->ApplyForce(glm::normalize(v1)*20.0f);
 					
-					ObjectB->force = vec3(0, 0, 0);
-					ObjectB->ApplyForce(glm::normalize(v2)*200.0f);
+					ObjectB->ApplyForce(glm::normalize(v2)*20.0f);
 					
 				}				
 			}

@@ -10,20 +10,8 @@ public:
 
 	~Sim();
 
-	void init() {};
-
-	void Solve();
-
-	void Simulate(float dt);
-
-	void Draw(GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition);
-
 	void Operate(float dt, GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition);
-
-	void ResolveCollison();
-
-	void RecomputeBoundingBox();
-
+	
 	void ToggleStop() { stop = !stop; }
 
 	std::vector<Object *> &GetObjects() { return objects; }
@@ -34,4 +22,16 @@ private:
 	bool IsInCollision(AABB *cube1, AABB *cube2);
 
 	bool stop = false;
+
+	void Solve();
+
+	void Simulate(float dt);
+
+	void Draw(GLuint program, glm::vec3 cameraPosition, glm::vec3 lightPosition);
+
+	void ResolveCollison();
+
+	void RecomputeBoundingBox();
+
+	void IsTooFar();
 };
