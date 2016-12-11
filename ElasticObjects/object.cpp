@@ -100,12 +100,73 @@ bool Object::IsInside(glm::vec3 point) {
 }
 
 void Object::CheckIfSolid() {
-	if (BodyVolume > 0.2) {
-		solid = true;
+	for (unsigned int i = 0; i < indices.size(); i += 3) { // loop over all faces
+		glm::vec3 v[3];
+		GLushort indRef[3];
+
+		indRef[0] = indices[i];
+		indRef[1] = indices[i + 1];
+		indRef[2] = indices[i + 2];
+
+		//each edge must be shared for an object to be solid
+		bool edgeShared01 = false;
+		bool edgeShared12 = false;
+		bool edgeShared20 = false;
+
+
+
+		for (unsigned int j = 0; j < indices.size(); j += 3) {
+			if (j == i) continue;
+
+			GLushort indTarg[3];
+
+			indTarg[0] = indices[j];
+			indTarg[1] = indices[j + 1];
+			indTarg[2] = indices[j + 2];
+
+			// 01
+			edgeShared01 |= (indRef[0] == indTarg[0] && indRef[1] == indTarg[1]);
+			edgeShared01 |= (indRef[0] == indTarg[1] && indRef[1] == indTarg[2]);
+			edgeShared01 |= (indRef[0] == indTarg[2] && indRef[1] == indTarg[0]);
+
+			edgeShared01 |= (indRef[0] == indTarg[1] && indRef[1] == indTarg[0]);
+			edgeShared01 |= (indRef[0] == indTarg[2] && indRef[1] == indTarg[1]);
+			edgeShared01 |= (indRef[0] == indTarg[0] && indRef[1] == indTarg[2]);
+
+			// 12
+			edgeShared12 |= (indRef[1] == indTarg[0] && indRef[2] == indTarg[1]);
+			edgeShared12 |= (indRef[1] == indTarg[1] && indRef[2] == indTarg[2]);
+			edgeShared12 |= (indRef[1] == indTarg[2] && indRef[2] == indTarg[0]);
+
+			edgeShared12 |= (indRef[1] == indTarg[1] && indRef[2] == indTarg[0]);
+			edgeShared12 |= (indRef[1] == indTarg[2] && indRef[2] == indTarg[1]);
+			edgeShared12 |= (indRef[1] == indTarg[0] && indRef[2] == indTarg[2]);
+
+			/// 20
+			edgeShared20 |= (indRef[2] == indTarg[0] && indRef[0] == indTarg[1]);
+			edgeShared20 |= (indRef[2] == indTarg[1] && indRef[0] == indTarg[2]);
+			edgeShared20 |= (indRef[2] == indTarg[2] && indRef[0] == indTarg[0]);
+
+			edgeShared20 |= (indRef[2] == indTarg[1] && indRef[0] == indTarg[0]);
+			edgeShared20 |= (indRef[2] == indTarg[2] && indRef[0] == indTarg[1]);
+			edgeShared20 |= (indRef[2] == indTarg[0] && indRef[0] == indTarg[2]);
+		}
+
+		//std::cout << i << std::endl;
+		//std::cout << edgeShared01 << std::endl;
+		//std::cout << edgeShared12 << std::endl;
+		//std::cout << edgeShared20 << std::endl;
+
+		if (!edgeShared01 || !edgeShared12 || !edgeShared20) {
+			solid = false;
+			return;
+			//std::cout << " no triangle found object is not solid" << std::endl;
+		}
+		else {
+			//std::cout << "triangle found object is solid" << std::endl;
+		}
 	}
-	else {
-		solid = false;
-	}
+	solid = true;
 }
 
 
@@ -118,63 +179,67 @@ void Object::CalculateBodyVolume_MC() {
 
 	std::cout << "Calculating body volume... ";
 
-	/*
-	* Calculate body volume using Monte Carlo method
-	*
-	*/
-
-	// we have a bounding-box of the object, entire object is expected to be in the bounding-box
-	// lets
-	AABB *BBCoords = GetAABB();
-
-	float BoundingBoxSizeX = fabs(BBCoords->max.x - BBCoords->min.x);
-	float BoundingBoxSizeY = fabs(BBCoords->max.y - BBCoords->min.y);
-	float BoundingBoxSizeZ = fabs(BBCoords->max.z - BBCoords->min.z);
-
-	float BoundingBoxVolume = BoundingBoxSizeX * BoundingBoxSizeY * BoundingBoxSizeZ;
-
-	if (indices.size() > 500.0) {
-		BodyVolume = BoundingBoxVolume;
-		std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
-		CheckIfSolid();
-		return;
-	}
-	//std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
-
-	//std::cout << "BBox size x: " << fabs(BBCoords->max.x - BBCoords->min.x) << std::endl;
-	//std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
-	//td::cout << "BBox size z: " << fabs(BBCoords->max.z - BBCoords->min.z) << std::endl;
-
-	const int NumberIterations = 1000000;
-	int hit = 0;
-
-	for (int i = 0; i < NumberIterations; i++) {
-		float rx = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float ry = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-		float rz = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
-
-		// generate random point inside of the bounding box
-		float xCoord = BBCoords->min.x + rx * BoundingBoxSizeX;
-		float yCoord = BBCoords->min.y + ry * BoundingBoxSizeY;
-		float zCoord = BBCoords->min.z + rz * BoundingBoxSizeZ;
-
-		// is the point inside or outside of the objects?
-		if (IsInside(glm::vec3(xCoord, yCoord, zCoord))) {
-			hit++;
-		}
-	}
-	BodyVolume = BoundingBoxVolume * ((float)hit / (float)NumberIterations);
 	CheckIfSolid();
-	std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
+	if (solid) {
+		/*
+		* Calculate body volume using Monte Carlo method
+		*
+		*/
+
+		// we have a bounding-box of the object, entire object is expected to be in the bounding-box
+		// lets
+		AABB *BBCoords = GetAABB();
+
+		float BoundingBoxSizeX = fabs(BBCoords->max.x - BBCoords->min.x);
+		float BoundingBoxSizeY = fabs(BBCoords->max.y - BBCoords->min.y);
+		float BoundingBoxSizeZ = fabs(BBCoords->max.z - BBCoords->min.z);
+
+		float BoundingBoxVolume = BoundingBoxSizeX * BoundingBoxSizeY * BoundingBoxSizeZ;
+
+		if (indices.size() > 500.0) {
+			BodyVolume = BoundingBoxVolume;
+			std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
+			return;
+		}
+		//std::cout << "BBox volume: " << BoundingBoxVolume << std::endl;
+
+		//std::cout << "BBox size x: " << fabs(BBCoords->max.x - BBCoords->min.x) << std::endl;
+		//std::cout << "BBox size Y: " << fabs(BBCoords->max.y - BBCoords->min.y) << std::endl;
+		//td::cout << "BBox size z: " << fabs(BBCoords->max.z - BBCoords->min.z) << std::endl;
+
+		const int NumberIterations = 1000000;
+		int hit = 0;
+
+		for (int i = 0; i < NumberIterations; i++) {
+			float rx = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			float ry = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+			float rz = static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+
+			// generate random point inside of the bounding box
+			float xCoord = BBCoords->min.x + rx * BoundingBoxSizeX;
+			float yCoord = BBCoords->min.y + ry * BoundingBoxSizeY;
+			float zCoord = BBCoords->min.z + rz * BoundingBoxSizeZ;
+
+			// is the point inside or outside of the objects?
+			if (IsInside(glm::vec3(xCoord, yCoord, zCoord))) {
+				hit++;
+			}
+		}
+		BodyVolume = BoundingBoxVolume * ((float)hit / (float)NumberIterations);
+		std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
+	}
+	else {
+		BodyVolume = 0.0f;
+		std::cout << "Object is not solid. Volume = " << BodyVolume << "." << std::endl;
+	}
 }
 
-
 void Object::CalculateBodyVolume_AABB() {
+	CheckIfSolid();
+	if (solid) {
+		std::cout << "Object is solid. Calculating body volume AABB... ";
+		AABB *BBCoords = GetAABB();
 
-	std::cout << "Calculating body volume... ";
-
-	
-	AABB *BBCoords = GetAABB();
 
 	float BoundingBoxSizeX = fabs(BBCoords->max.x - BBCoords->min.x);
 	float BoundingBoxSizeY = fabs(BBCoords->max.y - BBCoords->min.y);
@@ -184,6 +249,11 @@ void Object::CalculateBodyVolume_AABB() {
 	BodyVolume = BoundingBoxVolume;
 	CheckIfSolid();
 	std::cout << " Done. (Body volume: " << BodyVolume << ")" << std::endl;
+	}
+	else {
+		BodyVolume = 0.0f;
+		std::cout << "Object is not solid. Volume = " << BodyVolume << "." << std::endl;
+	}
 
 }
 
